@@ -400,12 +400,13 @@ if ($action === 'messages') {
 
     // Fetch associated prospect
     $prospectStmt = $db->prepare("
-        SELECT p.*, pkg.name as package_name, pkg.price as package_price, pkg.dp as package_dp,
+        SELECT p.*, u.name as cs_name, pkg.name as package_name, pkg.price as package_price, pkg.dp as package_dp,
                pkg.airline as package_airline, pkg.hotel_makkah as package_hotel_makkah,
                pkg.hotel_madinah as package_hotel_madinah, pkg.departure_info as package_departure_info,
                pkg.duration as package_duration, pkg.highlights as package_highlights
         FROM prospects p
         LEFT JOIN packages pkg ON p.package_id = pkg.id
+        LEFT JOIN users u ON p.user_id = u.id
         WHERE p.brand_id = ? AND (p.remote_jid = ? OR (? != '' AND (p.phone = ? OR p.phone = ?)) OR (? > 0 AND p.id = ?))
         LIMIT 1
     ");
@@ -652,9 +653,13 @@ if ($action === 'send_message' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $timestamp
     ]);
 
-    // Update prospect updated_at timestamp
+    // Update prospect updated_at timestamp & auto-assign to replying CS
     if ($prospectId) {
-        $db->prepare("UPDATE prospects SET updated_at = NOW() WHERE id = ?")->execute([$prospectId]);
+        if ($user['role'] === 'cs') {
+            $db->prepare("UPDATE prospects SET updated_at = NOW(), user_id = ? WHERE id = ?")->execute([$user['id'], $prospectId]);
+        } else {
+            $db->prepare("UPDATE prospects SET updated_at = NOW() WHERE id = ?")->execute([$prospectId]);
+        }
     }
 
     echo json_encode([
@@ -941,9 +946,13 @@ if ($action === 'send_media' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $timestamp
     ]);
 
-    // Update prospect updated_at timestamp
+    // Update prospect updated_at timestamp & auto-assign to replying CS
     if ($prospectId) {
-        $db->prepare("UPDATE prospects SET updated_at = NOW() WHERE id = ?")->execute([$prospectId]);
+        if ($user['role'] === 'cs') {
+            $db->prepare("UPDATE prospects SET updated_at = NOW(), user_id = ? WHERE id = ?")->execute([$user['id'], $prospectId]);
+        } else {
+            $db->prepare("UPDATE prospects SET updated_at = NOW() WHERE id = ?")->execute([$prospectId]);
+        }
     }
 
     echo json_encode([

@@ -124,7 +124,16 @@ function extract_phone_from_text(?string $text): ?string {
  * Helper to find or assign default CS user for a brand
  */
 function get_cs_user_for_brand(PDO $db, int $brandId): int {
-    $stmt = $db->prepare("SELECT id FROM users WHERE brand_id = ? AND role = 'cs' AND is_active = 1 ORDER BY id ASC LIMIT 1");
+    // Distribute among active CS of this brand by least active/open prospects
+    $stmt = $db->prepare("
+        SELECT u.id 
+        FROM users u
+        LEFT JOIN prospects p ON (u.id = p.user_id AND p.status NOT IN ('closed_won', 'closed_lost'))
+        WHERE u.brand_id = ? AND u.role = 'cs' AND u.is_active = 1
+        GROUP BY u.id
+        ORDER BY COUNT(p.id) ASC, u.id ASC
+        LIMIT 1
+    ");
     $stmt->execute([$brandId]);
     $userId = $stmt->fetchColumn();
 

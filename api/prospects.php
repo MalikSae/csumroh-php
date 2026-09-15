@@ -82,12 +82,12 @@ if ($action === 'list') {
     ";
 
     $params = [];
-    if ($user['role'] !== 'superadmin') {
-        $sql .= " WHERE p.brand_id = ? AND p.user_id = ?";
-        $params = [$brandId, $user['id']];
-    } elseif (!empty($_GET['brand_id'])) {
-        $sql .= " WHERE p.brand_id = ?";
-        $params = [$brandId];
+    $sql .= " WHERE p.brand_id = ?";
+    $params[] = $brandId;
+
+    if (!empty($_GET['user_id'])) {
+        $sql .= " AND p.user_id = ?";
+        $params[] = (int)$_GET['user_id'];
     }
 
     $sql .= " ORDER BY p.updated_at DESC";
@@ -169,9 +169,14 @@ if (($action === 'save' || $action === 'create' || $action === 'update') && $_SE
         $oldStmt->execute([$id]);
         $old = $oldStmt->fetch();
 
+        $targetUserId = (!empty($_POST['reassign_to_me']) || !empty($_POST['claim'])) ? $user['id'] : ($old['user_id'] ?? $user['id']);
+        if (!empty($_POST['user_id'])) {
+            $targetUserId = (int)$_POST['user_id'];
+        }
+
         $stmt = $db->prepare("
             UPDATE prospects 
-            SET package_id = ?, name = ?, phone = ?, current_stage = ?, status = ?, notes = ?, next_followup_date = ?,
+            SET user_id = ?, package_id = ?, name = ?, phone = ?, current_stage = ?, status = ?, notes = ?, next_followup_date = ?,
                 pax_quad = ?, pax_triple = ?, pax_double = ?, pax_infant = ?,
                 city = ?, lead_source = ?, target_month = ?, budget_range = ?, room_preference = ?,
                 special_needs = ?, decision_maker = ?, passport_status = ?, vaccine_status = ?,
@@ -181,6 +186,7 @@ if (($action === 'save' || $action === 'create' || $action === 'update') && $_SE
             WHERE id = ?
         ");
         $stmt->execute([
+            $targetUserId,
             $package_id, $name, $phone, $current_stage, $status, $notes, $next_followup_date,
             $pax_quad, $pax_triple, $pax_double, $pax_infant,
             $city, $lead_source, $target_month, $budget_range, $room_preference,
@@ -193,6 +199,10 @@ if (($action === 'save' || $action === 'create' || $action === 'update') && $_SE
 
         if (!empty($remote_jid)) {
             $db->prepare("UPDATE chat_messages SET prospect_id = ? WHERE brand_id = ? AND remote_jid = ?")->execute([$id, $brand_id, $remote_jid]);
+        }
+
+        if ($old && $old['user_id'] != $targetUserId) {
+            log_prospect_activity($id, $user['id'], 'reassigned', 'PIC Diperbarui', "Penanggung jawab dialihkan ke ID {$targetUserId}.");
         }
 
         // Activity audit logs
@@ -237,7 +247,7 @@ if (($action === 'save' || $action === 'create' || $action === 'update') && $_SE
     }
 
     $fetchStmt = $db->prepare("
-        SELECT p.*, pkg.name as package_name, pkg.price as package_price, pkg.dp as package_dp,
+        SELECT p.*, u.name as cs_name, pkg.name as package_name, pkg.price as package_price, pkg.dp as package_dp,
                pkg.price_quad, pkg.price_triple, pkg.price_double, pkg.price_infant,
                pkg.quota_remaining, pkg.departure_date, pkg.airline as package_airline,
                pkg.hotel_makkah as package_hotel_makkah, pkg.hotel_madinah as package_hotel_madinah,
@@ -245,6 +255,7 @@ if (($action === 'save' || $action === 'create' || $action === 'update') && $_SE
                pkg.highlights as package_highlights, pkg.flyer_image
         FROM prospects p
         LEFT JOIN packages pkg ON p.package_id = pkg.id
+        LEFT JOIN users u ON p.user_id = u.id
         WHERE p.id = ?
     ");
     $fetchStmt->execute([$id]);
@@ -255,7 +266,67 @@ if (($action === 'save' || $action === 'create' || $action === 'update') && $_SE
 }
 
 // -------------------------------------------------------------
-// 3. QUICK UPDATE STAGE / PIPELINE STATUS (WITH LOST REASON SUPPORT)
+// 3. CLAIM PROSPECT PIC (AMBIL ALIH / PINDAH CS)
+// -------------------------------------------------------------
+if ($action === 'claim' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
+    $id = !empty($input['id']) ? (int)$input['id'] : 0;
+    $targetUserId = !empty($input['user_id']) ? (int)$input['user_id'] : $user['id'];
+
+    if ($id > 0) {
+        $pStmt = $db->prepare("SELECT id, brand_id, user_id FROM prospects WHERE id = ?");
+        $pStmt->execute([$id]);
+        $prospect = $pStmt->fetch();
+
+        if (!$prospect) {
+            echo json_encode(['success' => false, 'error' => 'Prospek tidak ditemukan.']);
+            exit;
+        }
+
+        if ($user['role'] !== 'superadmin' && $prospect['brand_id'] != $user['brand_id']) {
+            echo json_encode(['success' => false, 'error' => 'Akses ditolak ke brand ini.']);
+            exit;
+        }
+
+        $stmt = $db->prepare("UPDATE prospects SET user_id = ?, updated_at = NOW() WHERE id = ?");
+        $stmt->execute([$targetUserId, $id]);
+
+        $uStmt = $db->prepare("SELECT id, name FROM users WHERE id = ?");
+        $uStmt->execute([$targetUserId]);
+        $targetUser = $uStmt->fetch();
+        $targetUserName = $targetUser['name'] ?? $user['name'];
+
+        log_prospect_activity($id, $user['id'], 'reassigned', 'Klaim Penanggung Jawab', "Prospek diambil alih oleh {$targetUserName}.");
+
+        $fetchStmt = $db->prepare("
+            SELECT p.*, u.name as cs_name, pkg.name as package_name, pkg.price as package_price, pkg.dp as package_dp,
+                   pkg.price_quad, pkg.price_triple, pkg.price_double, pkg.price_infant,
+                   pkg.quota_remaining, pkg.departure_date, pkg.airline as package_airline,
+                   pkg.hotel_makkah as package_hotel_makkah, pkg.hotel_madinah as package_hotel_madinah,
+                   pkg.flyer_image
+            FROM prospects p
+            LEFT JOIN packages pkg ON p.package_id = pkg.id
+            LEFT JOIN users u ON p.user_id = u.id
+            WHERE p.id = ?
+        ");
+        $fetchStmt->execute([$id]);
+        $fullProspect = $fetchStmt->fetch();
+
+        echo json_encode([
+            'success' => true,
+            'user_id' => $targetUserId,
+            'cs_name' => $targetUserName,
+            'prospect' => $fullProspect,
+            'message' => "Prospek berhasil ditugaskan ke {$targetUserName}."
+        ]);
+        exit;
+    }
+    echo json_encode(['success' => false, 'error' => 'ID prospek tidak valid.']);
+    exit;
+}
+
+// -------------------------------------------------------------
+// 4. QUICK UPDATE STAGE / PIPELINE STATUS (WITH LOST REASON SUPPORT)
 // -------------------------------------------------------------
 if (($action === 'update_status' || $action === 'update_stage') && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = (int)($_POST['id'] ?? 0);
