@@ -36,7 +36,12 @@ if ($currentUser['role'] === 'superadmin') {
     $allBrands = $db->query("SELECT id, name FROM brands ORDER BY id ASC")->fetchAll();
 }
 
-// Load initial prospects list with joins
+// Fetch active CS users for this brand
+$stmtCs = $db->prepare("SELECT id, name FROM users WHERE brand_id = ? AND role = 'cs' AND is_active = 1 ORDER BY name ASC");
+$stmtCs->execute([$brand['id']]);
+$brandCsUsers = $stmtCs->fetchAll();
+
+// Load initial prospects list with joins (Collaborative Brand-Scoped CRM)
 $sql = "
     SELECT p.*, b.name AS brand_name,
            pkg.name AS package_name, pkg.price AS package_price, pkg.dp AS package_dp,
@@ -49,18 +54,11 @@ $sql = "
     JOIN brands b ON p.brand_id = b.id
     LEFT JOIN packages pkg ON p.package_id = pkg.id
     LEFT JOIN users u ON p.user_id = u.id
+    WHERE p.brand_id = ?
+    ORDER BY p.updated_at DESC
 ";
-$params = [];
-if ($currentUser['role'] !== 'superadmin') {
-    $sql .= " WHERE p.brand_id = ? AND p.user_id = ?";
-    $params = [$brand['id'], $currentUser['id']];
-} else {
-    $sql .= " WHERE p.brand_id = ?";
-    $params = [$brand['id']];
-}
-$sql .= " ORDER BY p.updated_at DESC";
 $stmt = $db->prepare($sql);
-$stmt->execute($params);
+$stmt->execute([$brand['id']]);
 $initialProspects = $stmt->fetchAll();
 ?>
 
@@ -325,8 +323,45 @@ $initialProspects = $stmt->fetchAll();
                 </div>
             </div>
 
+            <!-- Filter CS PIC -->
+            <div class="flex items-center gap-1.5">
+                <span class="text-zinc-400 font-medium">PIC CS:</span>
+                <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                    <button type="button" @click="open = !open"
+                            class="px-2.5 py-1.5 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-lg text-xs font-medium text-black inline-flex items-center gap-2 transition cursor-pointer">
+                        <span x-text="getFilterCsLabel()"></span>
+                        <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                         class="absolute left-0 z-50 mt-1 w-52 bg-white border border-zinc-200 rounded-xl shadow-xl max-h-56 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                        <button type="button" @click="filterCs = ''; open = false"
+                                class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                :class="filterCs === '' ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                            <span>Semua Tim CS</span>
+                            <span x-show="filterCs === ''" class="text-black font-bold">✓</span>
+                        </button>
+                        <button type="button" @click="filterCs = 'mine'; open = false"
+                                class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                :class="filterCs === 'mine' ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                            <span x-text="'Milik Saya (' + currentUserName + ')'"></span>
+                            <span x-show="filterCs === 'mine'" class="text-black font-bold">✓</span>
+                        </button>
+                        <template x-for="cs in csUsers" :key="cs.id">
+                            <button type="button" @click="filterCs = String(cs.id); open = false"
+                                    class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                    :class="String(filterCs) === String(cs.id) ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                <span x-text="cs.name"></span>
+                                <span x-show="String(filterCs) === String(cs.id)" class="text-black font-bold">✓</span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
             <!-- Reset Filters -->
-            <button type="button" x-show="searchQuery || activeFilterPill !== 'all' || filterPackage || filterSource"
+            <button type="button" x-show="searchQuery || activeFilterPill !== 'all' || filterPackage || filterSource || filterCs"
                     @click="resetFilters()"
                     class="text-[11px] text-zinc-500 hover:text-black underline ml-auto">
                 Reset Filter
@@ -434,12 +469,27 @@ $initialProspects = $stmt->fetchAll();
                                     </div>
                                 </div>
 
+                                <!-- CS PIC & Claim -->
+                                <div class="flex items-center justify-between text-[11px] pt-1.5 border-t border-zinc-100">
+                                    <div class="flex items-center gap-1.5 truncate">
+                                        <span class="text-zinc-400 text-[10px]">PIC:</span>
+                                        <span class="font-semibold text-zinc-800 text-[11px] truncate" x-text="item.cs_name || 'Belum Ada'"></span>
+                                    </div>
+                                    <template x-if="item.user_id != currentUserId">
+                                        <button type="button" @click.stop="claimProspect(item)"
+                                                class="px-2 py-0.5 bg-zinc-100 hover:bg-black hover:text-white border border-zinc-200 text-zinc-700 text-[10px] font-bold rounded-lg transition shrink-0 cursor-pointer"
+                                                title="Ambil alih prospek ini">
+                                            Klaim
+                                        </button>
+                                    </template>
+                                </div>
+
                                 <!-- Quick Actions & Stage Mover Dropdown -->
                                 <div class="pt-2 border-t border-zinc-100 flex items-center justify-between gap-1.5">
                                     <div class="flex items-center gap-1">
                                         <!-- WhatsApp Chat Link -->
-                                        <template x-if="item.phone">
-                                            <a :href="'chat.php?phone=' + item.phone"
+                                        <template x-if="item.phone || item.remote_jid">
+                                            <a :href="'chat.php?prospect_id=' + item.id + (item.phone ? '&phone=' + encodeURIComponent(item.phone) : '') + (item.remote_jid ? '&jid=' + encodeURIComponent(item.remote_jid) : '')"
                                                title="Buka Chat WhatsApp"
                                                class="p-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 transition">
                                                 <svg class="w-3.5 h-3.5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
@@ -630,13 +680,24 @@ $initialProspects = $stmt->fetchAll();
                             </td>
 
                             <!-- CS PIC -->
-                            <td class="py-3.5 px-3 text-zinc-600 font-medium" x-text="p.cs_name || '-'"></td>
+                            <td class="py-3.5 px-3">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-medium text-zinc-800 text-xs" x-text="p.cs_name || 'Belum Ada'"></span>
+                                    <template x-if="p.user_id != currentUserId">
+                                        <button type="button" @click="claimProspect(p)"
+                                                class="px-1.5 py-0.5 bg-zinc-100 hover:bg-black hover:text-white border border-zinc-200 text-zinc-700 text-[9px] font-semibold rounded transition cursor-pointer"
+                                                title="Ambil alih prospek ini">
+                                            Klaim
+                                        </button>
+                                    </template>
+                                </div>
+                            </td>
 
                             <!-- Actions -->
                             <td class="py-3.5 px-4 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
-                                    <template x-if="p.phone">
-                                        <a :href="'chat.php?phone=' + p.phone" title="Live Chat WhatsApp"
+                                    <template x-if="p.phone || p.remote_jid">
+                                        <a :href="'chat.php?prospect_id=' + p.id + (p.phone ? '&phone=' + encodeURIComponent(p.phone) : '') + (p.remote_jid ? '&jid=' + encodeURIComponent(p.remote_jid) : '')" title="Live Chat WhatsApp"
                                            class="p-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 transition">
                                             <svg class="w-3.5 h-3.5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>
                                         </a>
@@ -1020,12 +1081,16 @@ function prospectsPage() {
         activeFilterPill: 'all', // 'all', 'high_intent', 'due_today', 'won', 'new'
         filterPackage: '',
         filterSource: '',
+        filterCs: '',
         saving: false,
 
         // Master Data from PHP
         prospects: <?= json_encode($initialProspects, JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE) ?> || [],
         packages: <?= json_encode($packages, JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE) ?> || [],
         brandId: <?= (int)$brand['id'] ?>,
+        currentUserId: <?= (int)$currentUser['id'] ?>,
+        currentUserName: <?= json_encode($currentUser['name'] ?? 'CS') ?>,
+        csUsers: <?= json_encode($brandCsUsers, JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE) ?> || [],
 
         // 8 Pipeline Stages
         pipelineStages: [
@@ -1209,6 +1274,13 @@ function prospectsPage() {
                     return false;
                 }
 
+                // Filter CS PIC
+                if (this.filterCs === 'mine') {
+                    if (Number(p.user_id) !== Number(this.currentUserId)) return false;
+                } else if (this.filterCs && Number(p.user_id) !== Number(this.filterCs)) {
+                    return false;
+                }
+
                 return true;
             });
         },
@@ -1226,6 +1298,7 @@ function prospectsPage() {
             this.activeFilterPill = 'all';
             this.filterPackage = '';
             this.filterSource = '';
+            this.filterCs = '';
         },
 
         // Helper calculations
@@ -1359,6 +1432,36 @@ function prospectsPage() {
         getFilterSourceLabel() {
             const match = this.leadSourceOptions.find(o => o.value === this.filterSource);
             return match ? match.label : 'Semua Sumber';
+        },
+
+        getFilterCsLabel() {
+            if (!this.filterCs) return 'Semua Tim CS';
+            if (this.filterCs === 'mine') return 'Milik Saya (' + this.currentUserName + ')';
+            const cs = this.csUsers.find(u => String(u.id) === String(this.filterCs));
+            return cs ? cs.name : 'Semua Tim CS';
+        },
+
+        async claimProspect(item) {
+            if (!item || !item.id) return;
+            try {
+                const res = await fetch('api/prospects.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'claim',
+                        id: item.id
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    item.user_id = data.user_id;
+                    item.cs_name = data.cs_name;
+                } else {
+                    alert(data.error || 'Gagal mengambil alih prospek.');
+                }
+            } catch(e) {
+                alert('Gagal menghubungi server.');
+            }
         },
 
         getLeadSourceLabel(val) {

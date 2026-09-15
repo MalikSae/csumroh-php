@@ -39,17 +39,9 @@ $sql = "
     LEFT JOIN packages pkg ON p.package_id = pkg.id
     LEFT JOIN users u ON p.user_id = u.id
 ";
-$params = [];
-if ($currentUser['role'] !== 'superadmin') {
-    $sql .= " WHERE p.brand_id = ? AND p.user_id = ?";
-    $params = [$brand['id'], $currentUser['id']];
-} else {
-    $sql .= " WHERE p.brand_id = ?";
-    $params = [$brand['id']];
-}
-$sql .= " ORDER BY p.updated_at DESC";
+$sql .= " WHERE p.brand_id = ? ORDER BY p.updated_at DESC";
 $stmt = $db->prepare($sql);
-$stmt->execute($params);
+$stmt->execute([$brand['id']]);
 $initialProspects = $stmt->fetchAll();
 
 // Check if a prospect was loaded from Data Prospek page

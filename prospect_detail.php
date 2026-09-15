@@ -125,7 +125,7 @@ $targetDp = $totalAdultPax * $pDp;
                 </a>
             <?php endif; ?>
 
-            <a href="chat.php?prospect_id=<?= $prospect['id'] ?><?= !empty($prospect['remote_jid']) ? ('&jid=' . urlencode($prospect['remote_jid'])) : '' ?>"
+            <a href="chat.php?prospect_id=<?= $prospect['id'] ?><?= !empty($prospect['phone']) ? ('&phone=' . urlencode($prospect['phone'])) : '' ?><?= !empty($prospect['remote_jid']) ? ('&jid=' . urlencode($prospect['remote_jid'])) : '' ?>"
                class="px-3 py-1.5 bg-white hover:bg-zinc-50 border border-zinc-200 text-zinc-700 rounded-lg text-xs font-medium transition inline-flex items-center gap-1.5">
                 <svg class="w-3.5 h-3.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 <span>Live Chat</span>
@@ -191,7 +191,15 @@ $targetDp = $totalAdultPax * $pDp;
                         <span>&bull;</span>
                         <span>Sumber: <strong class="text-zinc-700 capitalize" x-text="formatLeadSource(prospect.lead_source)"></strong></span>
                         <span>&bull;</span>
-                        <span>PIC: <strong class="text-zinc-700"><?= htmlspecialchars($prospect['cs_name'] ?? 'CS') ?></strong></span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <span>PIC: <strong class="text-zinc-700" x-text="prospect.cs_name || '<?= htmlspecialchars($prospect['cs_name'] ?? 'CS') ?>'"></strong></span>
+                            <template x-if="prospect.user_id != <?= (int)$currentUser['id'] ?>">
+                                <button type="button" @click="claimProspect()"
+                                        class="px-2 py-0.5 bg-zinc-100 hover:bg-black hover:text-white border border-zinc-200 text-zinc-700 text-[10px] font-bold rounded-md transition cursor-pointer">
+                                    Ambil Alih
+                                </button>
+                            </template>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -1522,6 +1530,30 @@ function prospect360Page() {
                 }
             } catch(e) {
                 console.error(e);
+            }
+        },
+
+        async claimProspect() {
+            if (!this.prospect || !this.prospect.id) return;
+            try {
+                const res = await fetch('api/prospects.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'claim',
+                        id: this.prospect.id
+                    })
+                });
+                const data = await res.json();
+                if (data.success && data.prospect) {
+                    this.prospect = data.prospect;
+                    window.showToast('Anda sekarang adalah PIC prospek ini.');
+                    await this.reloadLogs();
+                } else {
+                    alert(data.error || 'Gagal mengambil alih prospek.');
+                }
+            } catch(e) {
+                alert('Terjadi kesalahan.');
             }
         },
 

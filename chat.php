@@ -38,13 +38,66 @@ if ($isSuperAdmin) {
     $brandsList = $db->query("SELECT id, name, code, phone FROM brands ORDER BY id ASC")->fetchAll();
 }
 
-$activeJidParam = $_GET['jid'] ?? '';
+$activeJidParam = trim($_GET['jid'] ?? '');
 $activeProspectIdParam = (int)($_GET['prospect_id'] ?? 0);
+$activePhoneParam = trim($_GET['phone'] ?? '');
+
+// Auto-resolve jid, prospect_id, and phone if any of them is provided
+if ($activeProspectIdParam > 0) {
+    $stmtP = $db->prepare("SELECT id, phone, remote_jid FROM prospects WHERE id = ? LIMIT 1");
+    $stmtP->execute([$activeProspectIdParam]);
+    $rowP = $stmtP->fetch();
+    if ($rowP) {
+        if (empty($activeJidParam) && !empty($rowP['remote_jid'])) {
+            $activeJidParam = $rowP['remote_jid'];
+        }
+        if (empty($activePhoneParam) && !empty($rowP['phone'])) {
+            $activePhoneParam = $rowP['phone'];
+        }
+    }
+}
+
+if (!empty($activePhoneParam)) {
+    $phoneDigits = preg_replace('/[^\d]/', '', $activePhoneParam);
+    $last9 = strlen($phoneDigits) >= 9 ? substr($phoneDigits, -9) : $phoneDigits;
+
+    if ($activeProspectIdParam <= 0 && !empty($last9)) {
+        $stmtP = $db->prepare("SELECT id, phone, remote_jid FROM prospects WHERE brand_id = ? AND (phone = ? OR phone LIKE ?) ORDER BY updated_at DESC LIMIT 1");
+        $stmtP->execute([$userBrandId, $activePhoneParam, '%' . $last9]);
+        $rowP = $stmtP->fetch();
+        if ($rowP) {
+            $activeProspectIdParam = (int)$rowP['id'];
+            if (empty($activeJidParam) && !empty($rowP['remote_jid'])) {
+                $activeJidParam = $rowP['remote_jid'];
+            }
+        }
+    }
+
+    if (empty($activeJidParam) && !empty($last9)) {
+        $stmtMsg = $db->prepare("SELECT remote_jid FROM chat_messages WHERE brand_id = ? AND (phone = ? OR phone LIKE ? OR remote_jid LIKE ?) ORDER BY timestamp DESC LIMIT 1");
+        $stmtMsg->execute([$userBrandId, $activePhoneParam, '%' . $last9, '%' . $last9 . '@%']);
+        $foundJid = $stmtMsg->fetchColumn();
+        if ($foundJid) {
+            $activeJidParam = $foundJid;
+        }
+    }
+}
+
+if (!empty($activeJidParam) && ($activeProspectIdParam <= 0 || empty($activePhoneParam))) {
+    $stmtP = $db->prepare("SELECT id, phone FROM prospects WHERE brand_id = ? AND remote_jid = ? LIMIT 1");
+    $stmtP->execute([$userBrandId, $activeJidParam]);
+    $rowP = $stmtP->fetch();
+    if ($rowP) {
+        if ($activeProspectIdParam <= 0) $activeProspectIdParam = (int)$rowP['id'];
+        if (empty($activePhoneParam) && !empty($rowP['phone'])) $activePhoneParam = $rowP['phone'];
+    }
+}
 ?>
 
 <script>
 window.chatWorkspaceConfig = {
     brandId: <?= (int)$userBrandId ?>,
+    userId: <?= (int)($user['id'] ?? 1) ?>,
     csName: <?= json_encode($user['name'] ?? 'CS') ?>,
     brandName: <?= json_encode($brand['name'] ?? 'Travel Umroh') ?>,
     brandBank: <?= json_encode(!empty($brand['bank_name']) ? ($brand['bank_name'] . ' No. ' . ($brand['bank_account_number'] ?? '')) : 'Bank Rekening Resmi Perusahaan') ?>,
@@ -53,7 +106,8 @@ window.chatWorkspaceConfig = {
     packages: <?= json_encode($packages) ?>,
     rawScripts: <?= $scriptsJson ?: '{}' ?>,
     initialJid: <?= json_encode($activeJidParam) ?>,
-    initialProspectId: <?= (int)$activeProspectIdParam ?>
+    initialProspectId: <?= (int)$activeProspectIdParam ?>,
+    initialPhone: <?= json_encode($activePhoneParam) ?>
 };
 </script>
 
@@ -1122,6 +1176,20 @@ window.chatWorkspaceConfig = {
                                 <p class="text-[10px] text-zinc-400 mt-1">Nomor terikat ke sesi WhatsApp, tidak dapat diubah.</p>
                             </div>
 
+                            <!-- CS PIC Info & Claim Button -->
+                            <div class="pt-2.5 border-t border-zinc-200/60 flex items-center justify-between text-[11px]">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-zinc-400 font-medium">CS PIC:</span>
+                                    <span class="font-bold text-zinc-800" x-text="activeProspect.cs_name || 'Belum Ada'"></span>
+                                </div>
+                                <template x-if="activeProspect.user_id != userId">
+                                    <button type="button" @click="claimActiveProspect()"
+                                            class="px-2 py-1 bg-black hover:bg-zinc-800 text-white text-[10px] font-bold rounded-lg transition cursor-pointer">
+                                        Ambil Alih
+                                    </button>
+                                </template>
+                            </div>
+
                         </div>
 
                         <!-- 2. STATUS PIPELINE (9 STATUS KONVERSI) -->
@@ -1860,6 +1928,7 @@ function whatsappChatWorkspace(config) {
     config = config || {};
     return {
         brandId: config.brandId || 1,
+        userId: config.userId || 1,
         csName: config.csName || 'Fitri',
         brandName: config.brandName || 'Travel Umroh',
         brandBank: config.brandBank || 'Bank Rekening Resmi Perusahaan',
@@ -1966,24 +2035,56 @@ function whatsappChatWorkspace(config) {
         isFetchingPhotos: false,
         initialJid: config.initialJid || '',
         initialProspectId: config.initialProspectId || 0,
+        initialPhone: config.initialPhone || '',
 
         async init() {
             await this.checkStatus();
             if (this.connectionStatus === 'connected') {
                 await this.loadChats();
 
-                // Auto-select initial conversation ONLY if explicitly requested via URL (e.g. from prospects list)
+                // Auto-select initial conversation if requested via URL (jid, prospect_id, or phone)
+                let found = null;
                 if (this.initialJid) {
-                    const found = this.chats.find(c => c.remote_jid === this.initialJid);
-                    if (found) {
-                        this.selectChat(found);
-                    } else {
-                        this.selectChat({ remote_jid: this.initialJid, phone: this.initialJid.split('@')[0], prospect_id: this.initialProspectId });
+                    found = this.chats.find(c => c.remote_jid === this.initialJid);
+                }
+                if (!found && this.initialProspectId) {
+                    found = this.chats.find(c => Number(c.prospect_id) === Number(this.initialProspectId));
+                }
+                if (!found && (this.initialPhone || this.initialJid)) {
+                    const rawTarget = String(this.initialPhone || this.initialJid).replace(/\D/g, '');
+                    const last9 = rawTarget.length >= 9 ? rawTarget.slice(-9) : rawTarget;
+                    if (last9) {
+                        found = this.chats.find(c => {
+                            const cPhone = String(c.phone || '').replace(/\D/g, '');
+                            const cJidDigits = String(c.remote_jid || '').split('@')[0].replace(/\D/g, '');
+                            return (cPhone && cPhone.includes(last9)) || (cJidDigits && cJidDigits.includes(last9));
+                        });
                     }
-                } else if (this.initialProspectId) {
-                    const foundP = this.chats.find(c => c.prospect_id == this.initialProspectId);
-                    if (foundP) {
-                        this.selectChat(foundP);
+                }
+
+                if (found) {
+                    this.selectChat(found);
+                } else if (this.initialJid || this.initialPhone) {
+                    let rawPhone = String(this.initialPhone || '').replace(/\D/g, '');
+                    if (rawPhone.startsWith('0')) rawPhone = '62' + rawPhone.substring(1);
+                    else if (rawPhone.startsWith('8')) rawPhone = '62' + rawPhone;
+
+                    const targetJid = this.initialJid || (rawPhone ? (rawPhone + '@s.whatsapp.net') : '');
+                    const targetPhone = this.initialPhone || (targetJid ? targetJid.split('@')[0] : '');
+
+                    if (targetJid) {
+                        const stubChat = {
+                            remote_jid: targetJid,
+                            phone: targetPhone,
+                            prospect_id: this.initialProspectId || 0,
+                            prospect_name: '',
+                            sender_name: '',
+                            last_message: '',
+                            last_timestamp: new Date().toISOString()
+                        };
+                        this.chats.unshift(stubChat);
+                        this.filterChats();
+                        this.selectChat(stubChat);
                     }
                 }
             } else {
@@ -2974,6 +3075,7 @@ function whatsappChatWorkspace(config) {
             formData.append('action', 'save');
             formData.append('id', this.activeProspect.id);
             formData.append('brand_id', this.brandId);
+            formData.append('reassign_to_me', '1');
             formData.append('name', prospectName);
             formData.append('phone', this.prospectForm.phone || this.activeProspect.phone || '');
             formData.append('package_id', this.prospectForm.package_id || '');
@@ -3033,6 +3135,29 @@ function whatsappChatWorkspace(config) {
             }
         },
 
+        async claimActiveProspect() {
+            if (!this.activeProspect || !this.activeProspect.id) return;
+            const formData = new FormData();
+            formData.append('action', 'claim');
+            formData.append('id', this.activeProspect.id);
+            try {
+                const res = await fetch('api/prospects.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success && data.prospect) {
+                    this.activeProspect = data.prospect;
+                    this.syncProspectForm(data.prospect);
+                    this.loadChats(true);
+                } else {
+                    alert(data.error || 'Gagal mengambil alih prospek.');
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan jaringan.');
+            }
+        },
+
         async registerProspectFromChat() {
             if (!this.activeChat || this.isRegisteringProspect) return;
             this.isRegisteringProspect = true;
@@ -3044,6 +3169,7 @@ function whatsappChatWorkspace(config) {
             const formData = new FormData();
             formData.append('action', 'save');
             formData.append('brand_id', this.brandId);
+            formData.append('reassign_to_me', '1');
             formData.append('name', candidateName);
             formData.append('phone', candidatePhone);
             formData.append('package_id', this.newProspectPackageId || '');
