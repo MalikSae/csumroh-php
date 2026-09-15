@@ -196,6 +196,23 @@ function init_db(): void {
     $addColumn('chat_messages', 'quoted_text', 'TEXT NULL');
     $addColumn('chat_messages', 'quoted_sender', 'VARCHAR(100) NULL');
 
+    // Prospects Table Migrations (Enterprise CRM Umroh Standard)
+    $addColumn('prospects', 'city', 'VARCHAR(100) NULL');
+    $addColumn('prospects', 'lead_source', "VARCHAR(50) DEFAULT 'whatsapp'");
+    $addColumn('prospects', 'target_month', 'VARCHAR(100) NULL');
+    $addColumn('prospects', 'budget_range', 'VARCHAR(50) NULL');
+    $addColumn('prospects', 'room_preference', 'VARCHAR(50) NULL');
+    $addColumn('prospects', 'special_needs', 'TEXT NULL');
+    $addColumn('prospects', 'decision_maker', 'VARCHAR(50) NULL');
+    $addColumn('prospects', 'passport_status', "VARCHAR(50) DEFAULT 'belum_ada'");
+    $addColumn('prospects', 'vaccine_status', "VARCHAR(50) DEFAULT 'belum'");
+    $addColumn('prospects', 'deal_value', 'DECIMAL(15,2) DEFAULT 0');
+    $addColumn('prospects', 'dp_amount', 'DECIMAL(15,2) DEFAULT 0');
+    $addColumn('prospects', 'dp_paid_at', 'DATETIME NULL');
+    $addColumn('prospects', 'payment_status', "VARCHAR(50) DEFAULT 'unpaid'");
+    $addColumn('prospects', 'lost_reason', 'VARCHAR(100) NULL');
+    $addColumn('prospects', 'lost_reason_detail', 'TEXT NULL');
+
     // Packages Table Migrations (CRM Umroh Pro)
     $addColumn('packages', 'departure_date', 'DATE NULL');
     $addColumn('packages', 'flight_type', "ENUM('direct', 'transit') DEFAULT 'direct'");
