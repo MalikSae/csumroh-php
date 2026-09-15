@@ -29,7 +29,7 @@
             "title": "Sapa Jamaah Baru dari Web / Link Iklan",
             "use_when": "CS menyapa calon jamaah yang baru mengisi form minat di web atau iklan resmi travel.",
             "prospect_example": "(Data masuk di pipeline CS)",
-            "script": "Assalamu'alaikum Kak {{nama}} 😊 Terima kasih telah menghubungi layanan resmi {{travel}}. Saya {{cs_name}} dari tim layanan jamaah. Menindaklanjuti data formulir yang Kakak isi di website kami, apakah Kakak sedang mencari paket keberangkatan dalam waktu dekat ini atau untuk musim liburan nanti, Kak?",
+            "script": "Assalamu'alaikum Kak {{nama}} 😊 Terima kasih telah menghubungi layanan resmi {{travel}}.\n\nSaya {{cs_name}} dari tim layanan jamaah. Menindaklanjuti data formulir yang Kakak isi di website kami, apakah Kakak sedang mencari paket keberangkatan dalam waktu dekat ini atau untuk musim liburan nanti, Kak?",
             "next_stage": "identification",
             "tags": [
                 "outbound",
@@ -43,7 +43,7 @@
             "title": "Menyapa Kenalan / Kerabat (Personal Network)",
             "use_when": "CS menyapa kontak relasi untuk menawarkan informasi umroh resmi.",
             "prospect_example": "(Inisiatif CS ke kontak pribadi)",
-            "script": "Assalamu'alaikum Kak {{nama}} 😊 Semoga berkah dan sehat selalu sekeluarga. Senang bisa menyapa Kakak kembali. Sekadar mengabarkan, saat ini saya bertugas di layanan konsultasi resmi {{travel}}. Semisal Kakak atau keluarga ada rencana ibadah umroh di tahun ini, boleh saya bantu kirimkan jadwal keberangkatan terbarunya, Kak?",
+            "script": "Assalamu'alaikum Kak {{nama}} 😊 Semoga berkah dan sehat selalu sekeluarga. Senang bisa menyapa Kakak kembali.\n\nSekadar mengabarkan, saat ini saya bertugas di layanan konsultasi resmi {{travel}}. Semisal Kakak atau keluarga ada rencana ibadah umroh di tahun ini, boleh saya bantu kirimkan jadwal keberangkatan terbarunya, Kak?",
             "next_stage": "identification",
             "tags": [
                 "personal_network",
@@ -57,7 +57,7 @@
             "title": "Greeting Umum",
             "use_when": "Prospek baru menyapa tanpa menyampaikan kebutuhan.",
             "prospect_example": "Assalamu'alaikum",
-            "script": "Wa'alaikumussalam Kak {{nama}} 😊 Selamat datang di layanan resmi {{travel}}. Saya {{cs_name}} yang siap membantu rencana ibadah Kakak. Boleh tahu, Kakak sedang mencari informasi paket untuk keberangkatan di bulan apa?",
+            "script": "Wa'alaikumussalam Kak {{nama}} 😊 Selamat datang di layanan resmi {{travel}}.\n\nSaya {{cs_name}} yang siap membantu rencana ibadah Kakak. Boleh tahu, Kakak sedang mencari informasi paket untuk keberangkatan di bulan apa?",
             "next_stage": "identification",
             "tags": [
                 "general",
@@ -70,7 +70,7 @@
             "title": "Prospek Hanya Bilang Halo",
             "use_when": "Prospek hanya mengirim sapaan singkat.",
             "prospect_example": "Halo kak",
-            "script": "Halo Kak {{nama}} 😊 Terima kasih sudah menghubungi {{travel}}. Saya {{cs_name}}, siap mendampingi rencana ibadah Kakak. Boleh tahu, Kakak tertarik dengan paket umroh promo hemat atau paket yang fasilitasnya lebih nyaman/premium, Kak?",
+            "script": "Halo Kak {{nama}} 😊 Terima kasih sudah menghubungi {{travel}}.\n\nSaya {{cs_name}}, siap mendampingi rencana ibadah Kakak. Boleh tahu, Kakak tertarik dengan paket umroh promo hemat atau paket yang fasilitasnya lebih nyaman/premium, Kak?",
             "next_stage": "identification",
             "tags": [
                 "general",
@@ -83,7 +83,7 @@
             "title": "Prospek Minta Info Umroh",
             "use_when": "Prospek mengatakan ingin meminta informasi umroh tetapi belum spesifik.",
             "prospect_example": "Mau tanya info umroh kak",
-            "script": "Siap dengan senang hati Kak {{nama}} 😊 Saya {{cs_name}} dari Customer Service resmi {{travel}}. Agar saya bisa pilihkan paket yang paling pas, rencananya Kakak ingin berangkat di kisaran bulan apa?",
+            "script": "Siap dengan senang hati Kak {{nama}} 😊\n\nSaya {{cs_name}} dari Customer Service resmi {{travel}}. Agar saya bisa pilihkan paket yang paling pas, rencananya Kakak ingin berangkat di kisaran bulan apa?",
             "next_stage": "identification",
             "tags": [
                 "info",
@@ -96,7 +96,7 @@
             "title": "Langsung Tanya Harga",
             "use_when": "Pesan pertama prospek langsung menanyakan harga umroh.",
             "prospect_example": "Umroh berapa kak?",
-            "script": "Siap Kak {{nama}}. Ada beberapa pilihan harga. Supaya saya nggak salah kasih paket, rencananya Kakak ingin berangkat bulan apa?",
+            "script": "Siap Kak {{nama}}, ada beberapa pilihan paket umroh yang tersedia 😊\n\nSupaya saya tidak salah kasih rekomendasi, rencananya Kakak ingin berangkat di kisaran bulan apa?",
             "next_stage": "identification",
             "tags": [
                 "harga",
@@ -110,7 +110,7 @@
             "title": "Tanya Paket Termurah",
             "use_when": "Prospek langsung mencari harga paling murah.",
             "prospect_example": "Yang paling murah berapa?",
-            "script": "Ada beberapa pilihan Kak 😊 Biar saya carikan yang pas, boleh tahu rencananya berangkat dari {{kota}} atau kota lain?",
+            "script": "Ada beberapa pilihan paket promo menarik Kak 😊\n\nBiar saya carikan yang pas, boleh tahu rencananya berangkat dari {{kota}} atau kota lain?",
             "next_stage": "identification",
             "tags": [
                 "harga",
@@ -124,7 +124,7 @@
             "title": "Langsung Tanya Jadwal",
             "use_when": "Prospek langsung menanyakan jadwal keberangkatan.",
             "prospect_example": "Ada keberangkatan Desember?",
-            "script": "Ada Kak, saya bantu cek pilihan keberangkatannya ya. Rencananya untuk berapa orang?",
+            "script": "Ada Kak, saya bantu cek pilihan jadwal keberangkatannya ya 😊\n\nRencananya untuk keberangkatan berapa orang, Kak?",
             "next_stage": "identification",
             "tags": [
                 "schedule",
@@ -137,7 +137,7 @@
             "title": "Sudah Menyebut Bulan",
             "use_when": "Prospek sudah menyebut target bulan keberangkatan.",
             "prospect_example": "Saya cari umroh bulan Februari.",
-            "script": "Siap Kak. Untuk Februari saya bantu carikan pilihannya. Rencananya berangkat sendiri atau bersama keluarga?",
+            "script": "Siap Kak, untuk keberangkatan Februari saya bantu carikan pilihan terbaiknya 😊\n\nRencananya berangkat sendiri atau bersama keluarga?",
             "next_stage": "identification",
             "tags": [
                 "schedule",
@@ -150,7 +150,7 @@
             "title": "Prospek Minta Paket",
             "use_when": "Prospek langsung meminta pilihan paket.",
             "prospect_example": "Boleh kirim paket umrohnya?",
-            "script": "Boleh Kak 😊 Biar yang saya kirim nggak terlalu banyak, Kakak sudah ada target keberangkatan bulan apa?",
+            "script": "Boleh Kak 😊\n\nBiar informasi yang saya kirim tepat sasaran dan tidak terlalu banyak, Kakak sudah ada target keberangkatan di bulan apa?",
             "next_stage": "identification",
             "tags": [
                 "package",
@@ -163,7 +163,7 @@
             "title": "Prospek Minta Brosur",
             "use_when": "Prospek langsung meminta brosur.",
             "prospect_example": "Kirim brosurnya dong kak",
-            "script": "Siap Kak, dengan senang hati. Karena pilihan paket kami cukup beragam, agar saya kirimkan brosur yang paling pas, rencananya Kakak ingin keberangkatan di bulan apa?",
+            "script": "Siap Kak, dengan senang hati 😊\n\nKarena pilihan paket kami cukup beragam, agar saya kirimkan brosur yang paling pas, rencananya Kakak ingin keberangkatan di bulan apa?",
             "next_stage": "identification",
             "tags": [
                 "brochure",
@@ -177,7 +177,7 @@
             "title": "Prospek Ingin Berangkat dengan Keluarga",
             "use_when": "Pesan pertama sudah menyebut ingin berangkat bersama keluarga.",
             "prospect_example": "Saya mau umroh sama keluarga.",
-            "script": "MasyaAllah, siap Kak 😊 InsyaAllah saya bantu carikan yang cocok untuk keluarga. Rencananya berapa orang yang akan ikut?",
+            "script": "MasyaAllah, siap Kak 😊 InsyaAllah saya bantu carikan paket yang paling cocok dan nyaman untuk keluarga.\n\nRencananya berapa orang yang akan ikut berangkat bersama?",
             "next_stage": "identification",
             "tags": [
                 "family",
@@ -190,7 +190,7 @@
             "title": "Prospek Ingin Membawa Orang Tua",
             "use_when": "Prospek menyebut ingin berangkat bersama ayah atau ibu.",
             "prospect_example": "Saya mau ajak ibu umroh.",
-            "script": "MasyaAllah 😊 InsyaAllah saya bantu carikan yang nyaman untuk Ibu. Kalau boleh tahu, usia beliau sekarang berapa, Kak?",
+            "script": "MasyaAllah, niat mulia sekali Kak 😊 InsyaAllah saya bantu carikan paket yang fasilitas dan jarak hotelnya paling nyaman untuk Ibu.\n\nKalau boleh tahu, usia beliau sekarang berapa, Kak?",
             "next_stage": "identification",
             "tags": [
                 "orang_tua",
@@ -204,7 +204,7 @@
             "title": "Prospek Ingin Umroh dengan Pasangan",
             "use_when": "Prospek menyebut akan berangkat dengan suami atau istri.",
             "prospect_example": "Mau umroh berdua sama suami.",
-            "script": "MasyaAllah, siap Bu 😊 Saya bantu carikan pilihan untuk berdua. Sudah ada target bulan keberangkatannya?",
+            "script": "MasyaAllah, siap Bu 😊 Saya bantu carikan pilihan paket terbaik untuk berdua.\n\nSudah ada target bulan keberangkatannya?",
             "next_stage": "identification",
             "tags": [
                 "pasangan",
@@ -217,7 +217,7 @@
             "title": "Pertama Kali Umroh",
             "use_when": "Prospek mengatakan belum pernah umroh sebelumnya.",
             "prospect_example": "Saya belum pernah umroh, mau tanya-tanya dulu.",
-            "script": "Alhamdulillah, berkah niat baiknya Kak {{nama}} 😊 Saya {{cs_name}} dari tim bimbingan jamaah {{travel}}. Tenang saja Kak, kami siap dampingi dan jelaskan seluruh prosesnya dari nol sampai selesai di Tanah Suci. Untuk rencana awal, Kakak berniat berangkat sendiri atau bersama keluarga tercinta?",
+            "script": "Alhamdulillah, berkah niat baiknya Kak {{nama}} 😊 Saya {{cs_name}} dari tim bimbingan jamaah {{travel}}.\n\nTenang saja Kak, kami siap dampingi dan jelaskan seluruh prosesnya dari nol sampai selesai di Tanah Suci. Untuk rencana awal, Kakak berniat berangkat sendiri atau bersama keluarga tercinta?",
             "next_stage": "identification",
             "tags": [
                 "first_timer",
@@ -231,7 +231,7 @@
             "title": "Prospek Langsung Menyebut Budget",
             "use_when": "Prospek menyebut kisaran budget pada pesan pertama.",
             "prospect_example": "Ada paket sekitar 30 juta?",
-            "script": "Ada beberapa pilihan yang bisa kita sesuaikan Kak. Supaya saya carikan yang paling tepat dengan budget itu, rencananya mau berangkat bulan apa?",
+            "script": "Ada beberapa pilihan paket yang bisa kita sesuaikan dengan budget Kakak 😊\n\nSupaya saya carikan yang paling tepat dan hemat, rencananya mau berangkat bulan apa?",
             "next_stage": "identification",
             "tags": [
                 "budget",
@@ -244,7 +244,7 @@
             "title": "Prospek Menanyakan Keberangkatan dari Kota Tertentu",
             "use_when": "Prospek langsung menanyakan keberangkatan dari kota tertentu.",
             "prospect_example": "Ada keberangkatan dari Medan?",
-            "script": "Ada Kak, saya bantu cek jadwal dari Medan ya. Sudah ada target bulan keberangkatannya?",
+            "script": "Ada Kak, saya bantu cek jadwal keberangkatan dari Medan ya 😊\n\nSudah ada target bulan keberangkatannya?",
             "next_stage": "identification",
             "tags": [
                 "departure_city",
@@ -257,7 +257,7 @@
             "title": "Prospek dari Referral Jamaah",
             "use_when": "Prospek mengatakan mendapat kontak CS dari jamaah atau kenalan.",
             "prospect_example": "Saya dapat nomor Kakak dari Bu Rina.",
-            "script": "MasyaAllah, salam hangat untuk keluarga ya Kak 😊 Terima kasih sudah menghubungi {{travel}}. Saya {{cs_name}}, betul sekali alhamdulillah Bu Rina adalah jamaah kami yang telah mempercayakan perjalanan ibadahnya bersama {{travel}}. Untuk rencana ibadah Kakak sendiri, apakah ada rencana berangkat di periode yang sama dengan beliau?",
+            "script": "MasyaAllah, salam hangat untuk keluarga ya Kak 😊 Terima kasih sudah menghubungi {{travel}}.\n\nSaya {{cs_name}}, betul sekali alhamdulillah Bu Rina adalah jamaah kami yang telah mempercayakan perjalanan ibadahnya bersama {{travel}}. Untuk rencana ibadah Kakak sendiri, apakah ada rencana berangkat di periode yang sama dengan beliau?",
             "next_stage": "identification",
             "tags": [
                 "referral",
@@ -270,7 +270,7 @@
             "title": "Referral Tanpa Menyebut Nama",
             "use_when": "Prospek mengatakan mendapat nomor dari teman tetapi tidak menyebut siapa.",
             "prospect_example": "Nomornya dapat dari teman.",
-            "script": "Alhamdulillah, terima kasih banyak ya Kak sudah menghubungi layanan resmi {{travel}} 😊 Saya {{cs_name}} yang siap melayani Kakak. Biar saya bisa siapkan informasi yang paling sesuai, Kakak ingin rekomendasi jadwal keberangkatan terdekat atau paket promo khusus, Kak?",
+            "script": "Alhamdulillah, terima kasih banyak ya Kak sudah menghubungi layanan resmi {{travel}} 😊\n\nSaya {{cs_name}} yang siap melayani Kakak. Biar saya bisa siapkan informasi yang paling sesuai, Kakak ingin rekomendasi jadwal keberangkatan terdekat atau paket promo khusus, Kak?",
             "next_stage": "identification",
             "tags": [
                 "referral",
@@ -283,7 +283,7 @@
             "title": "Prospek dari Media Sosial",
             "use_when": "Prospek masuk setelah melihat postingan atau konten seputar umroh.",
             "prospect_example": "Saya lihat dari Instagram.",
-            "script": "MasyaAllah, terima kasih sudah menyapa akun resmi {{travel}} ya Kak {{nama}} 😊 Saya {{cs_name}} dari tim layanan jamaah. Apakah Kakak tertarik dengan paket yang tadi Kakak lihat di postingan media sosial kami, atau sedang mencari jadwal keberangkatan lain?",
+            "script": "MasyaAllah, terima kasih sudah menyapa akun resmi {{travel}} ya Kak {{nama}} 😊 Saya {{cs_name}} dari tim layanan jamaah.\n\nApakah Kakak tertarik dengan paket yang tadi Kakak lihat di postingan media sosial kami, atau sedang mencari jadwal keberangkatan lain?",
             "next_stage": "identification",
             "tags": [
                 "instagram",
@@ -297,7 +297,7 @@
             "title": "Prospek dari Status WhatsApp",
             "use_when": "Prospek membalas status WhatsApp terkait paket atau perjalanan umroh.",
             "prospect_example": "Ini keberangkatan kapan kak?",
-            "script": "Betul sekali Kak, yang di status tadi untuk keberangkatan bulan {{bulan}} 😊 Apakah Kakak sedang mencari jadwal keberangkatan di bulan tersebut?",
+            "script": "Betul sekali Kak, yang di status tadi untuk keberangkatan bulan {{bulan}} 😊\n\nApakah Kakak sedang mencari jadwal keberangkatan di bulan tersebut?",
             "next_stage": "identification",
             "tags": [
                 "whatsapp",
@@ -311,7 +311,7 @@
             "title": "Prospek dari Iklan / Link Web",
             "use_when": "Prospek masuk dari link/iklan dan pesan awal masih umum.",
             "prospect_example": "Saya mau info lebih lanjut.",
-            "script": "Assalamu'alaikum Kak {{nama}} 😊 Terima kasih telah menghubungi WhatsApp resmi {{travel}}. Saya {{cs_name}}, siap memberikan rincian promo yang Kakak lihat di iklan kami. Untuk kuota promonya, rencananya Kakak ingin cek untuk keberangkatan berapa orang, Kak?",
+            "script": "Assalamu'alaikum Kak {{nama}} 😊 Terima kasih telah menghubungi WhatsApp resmi {{travel}}.\n\nSaya {{cs_name}}, siap memberikan rincian promo yang Kakak lihat di iklan kami. Untuk kuota promonya, rencananya Kakak ingin cek untuk keberangkatan berapa orang, Kak?",
             "next_stage": "identification",
             "tags": [
                 "ads",
@@ -324,7 +324,7 @@
             "title": "Prospek Bertanya Promo",
             "use_when": "Prospek masuk karena melihat informasi promo.",
             "prospect_example": "Promonya masih ada?",
-            "script": "Untuk promo yang Kakak lihat saya bantu cek alokasi seat-nya dulu ya 😊 Rencananya keberangkatan untuk berapa orang?",
+            "script": "Untuk promo yang Kakak lihat, saya bantu cek alokasi seat-nya dulu ya 😊\n\nRencananya keberangkatan untuk berapa orang?",
             "next_stage": "identification",
             "tags": [
                 "promo",
@@ -337,7 +337,7 @@
             "title": "Prospek Langsung Tanya Hotel",
             "use_when": "Prospek langsung menanyakan hotel atau jaraknya.",
             "prospect_example": "Hotelnya dekat nggak?",
-            "script": "Untuk paket yang Kakak lihat, saya bantu cek detail hotel dan jarak jalannya ya. Kalau boleh tahu, jarak hotel jadi prioritas karena berangkat dengan orang tua atau memang ingin lebih nyaman?",
+            "script": "Untuk paket yang Kakak tanyakan, saya bantu cek detail hotel dan jarak jalannya ya 😊\n\nKalau boleh tahu, jarak hotel jadi prioritas utama karena berangkat bersama orang tua atau memang ingin yang lebih dekat ke masjid?",
             "next_stage": "identification",
             "tags": [
                 "hotel",
@@ -351,7 +351,7 @@
             "title": "Prospek Langsung Tanya Travel Aman atau Tidak",
             "use_when": "Pesan pertama menunjukkan kekhawatiran tentang keamanan atau kepercayaan.",
             "prospect_example": "Travelnya aman nggak?",
-            "script": "Sangat wajar dan tepat sekali Kakak menanyakan hal ini di awal. Ini perjalanan ibadah mulia. Kami di {{travel}} adalah penyelenggara resmi berizin Kemenag RI dengan nomor PPIU: {{ppiu}}. Seluruh transaksi dilakukan melalui rekening giro resmi perusahaan atas nama PT, bukan perorangan. Apakah Kakak ingin saya kirimkan tautan pengecekan izin resmi kami di website Kemenag RI sekarang, Kak?",
+            "script": "Sangat wajar dan tepat sekali Kakak menanyakan hal ini di awal. Ini perjalanan ibadah yang mulia.\n\nKami di {{travel}} adalah penyelenggara resmi berizin Kemenag RI dengan nomor PPIU: {{ppiu}}. Seluruh transaksi dilakukan melalui rekening giro resmi perusahaan atas nama PT, bukan perorangan.\n\nApakah Kakak ingin saya kirimkan tautan pengecekan izin resmi kami di website Kemenag RI sekarang, Kak?",
             "next_stage": "identification",
             "tags": [
                 "trust",
@@ -364,7 +364,7 @@
             "title": "Prospek Langsung Tanya Legalitas",
             "use_when": "Prospek langsung meminta informasi legalitas travel.",
             "prospect_example": "Travel ini resmi?",
-            "script": "Siap Kak, pertanyaan itu memang sangat penting sebelum mendaftar. Saya kirimkan nomor izin PPIU resmi Kemenag dan legalitas travel kami ya. Kakak sedang membandingkan beberapa travel juga ya?",
+            "script": "Siap Kak, pertanyaan itu memang sangat penting sebelum memutuskan mendaftar 😊\n\nSaya kirimkan nomor izin PPIU resmi Kemenag dan legalitas travel kami ya. Kakak saat ini sedang membandingkan beberapa travel juga?",
             "next_stage": "identification",
             "tags": [
                 "legalitas",
@@ -378,7 +378,7 @@
             "title": "Prospek Lama Chat Kembali",
             "use_when": "Prospek yang pernah berdiskusi kembali menghubungi Agen.",
             "prospect_example": "Kak, masih ada paket umroh?",
-            "script": "Ada Kak 😊 Senang bisa silaturahmi lagi. Terakhir kita sempat bahas rencana umroh juga ya. Sekarang target keberangkatannya masih sama atau sudah ada tanggal baru?",
+            "script": "Alhamdulillah senang bisa silaturahmi kembali dengan Kakak 😊\n\nTerakhir kita sempat membahas rencana ibadah umroh ya Kak. Untuk rencana keberangkatan saat ini apakah masih sama target bulannya, atau sudah ada rencana tanggal baru?",
             "next_stage": "identification",
             "tags": [
                 "old_prospect",
@@ -391,7 +391,7 @@
             "title": "Prospek Sudah Menyebut Paket",
             "use_when": "Prospek menyebut nama atau paket tertentu pada pesan pertama.",
             "prospect_example": "Saya tertarik paket {{paket}}.",
-            "script": "Siap Kak 😊 Untuk {{paket}} saya bantu jelaskan. Rencananya nanti berangkat berapa orang?",
+            "script": "Siap Kak 😊 Untuk {{paket}} saya bantu jelaskan rincian lengkapnya ya.\n\nRencananya nanti berangkat untuk berapa orang?",
             "next_stage": "identification",
             "tags": [
                 "specific_package",
@@ -404,7 +404,7 @@
             "title": "Prospek Langsung Ingin Daftar",
             "use_when": "Prospek datang dengan buying intent tinggi dan mengatakan ingin mendaftar.",
             "prospect_example": "Saya mau daftar umroh.",
-            "script": "MasyaAllah, alhamdulillah siap kami bantu proses pendaftarannya Kak 😊 Boleh diinfokan nama paket atau tanggal keberangkatan yang sudah Kakak incar?",
+            "script": "MasyaAllah, alhamdulillah siap kami bantu proses pendaftarannya Kak 😊\n\nBoleh diinfokan nama paket atau tanggal keberangkatan yang sudah Kakak incar?",
             "next_stage": "identification",
             "tags": [
                 "high_intent",
@@ -418,7 +418,7 @@
             "title": "Prospek Langsung Tanya Seat",
             "use_when": "Prospek langsung menanyakan ketersediaan seat tertentu.",
             "prospect_example": "Untuk tanggal 12 Desember masih ada seat?",
-            "script": "Saya bantu cek ya Kak. Rencananya butuh berapa seat?",
+            "script": "Siap Kak, saya bantu cek ketersediaan kuota seat-nya ya 😊\n\nRencananya butuh untuk berapa seat?",
             "next_stage": "identification",
             "tags": [
                 "high_intent",
