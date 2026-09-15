@@ -263,29 +263,66 @@ $initialProspects = $stmt->fetchAll();
             <!-- Filter Paket -->
             <div class="flex items-center gap-1.5">
                 <span class="text-zinc-400 font-medium">Paket:</span>
-                <select x-model="filterPackage"
-                        class="px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-medium text-black focus:border-black outline-none">
-                    <option value="">Semua Paket (Termasuk Belum Memilih)</option>
-                    <option value="none">-- Belum Menentukan Paket --</option>
-                    <?php foreach ($packages as $pkg): ?>
-                        <option value="<?= $pkg['id'] ?>"><?= htmlspecialchars($pkg['name']) ?> (<?= htmlspecialchars($pkg['price']) ?>)</option>
-                    <?php endforeach; ?>
-                </select>
+                <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                    <button type="button" @click="open = !open"
+                            class="px-2.5 py-1.5 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-lg text-xs font-medium text-black inline-flex items-center gap-2 transition cursor-pointer">
+                        <span class="truncate max-w-[180px]" x-text="getFilterPackageLabel()"></span>
+                        <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                         class="absolute left-0 z-50 mt-1 w-64 bg-white border border-zinc-200 rounded-xl shadow-xl max-h-56 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                        <button type="button" @click="filterPackage = ''; open = false"
+                                class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                :class="filterPackage === '' ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                            <span>Semua Paket</span>
+                            <span x-show="filterPackage === ''" class="text-black font-bold">✓</span>
+                        </button>
+                        <button type="button" @click="filterPackage = 'none'; open = false"
+                                class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                :class="filterPackage === 'none' ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                            <span class="italic text-zinc-500">-- Belum Menentukan Paket --</span>
+                            <span x-show="filterPackage === 'none'" class="text-black font-bold">✓</span>
+                        </button>
+                        <template x-for="pkg in packages" :key="pkg.id">
+                            <button type="button" @click="filterPackage = String(pkg.id); open = false"
+                                    class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                    :class="String(filterPackage) === String(pkg.id) ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                <div class="truncate pr-2">
+                                    <div class="truncate font-medium" x-text="pkg.name"></div>
+                                    <div class="text-[10px] text-zinc-400 font-mono" x-text="pkg.price"></div>
+                                </div>
+                                <span x-show="String(filterPackage) === String(pkg.id)" class="text-black font-bold shrink-0">✓</span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
             </div>
 
             <!-- Filter Sumber Lead -->
             <div class="flex items-center gap-1.5">
                 <span class="text-zinc-400 font-medium">Sumber Lead:</span>
-                <select x-model="filterSource"
-                        class="px-2.5 py-1.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-medium text-black focus:border-black outline-none">
-                    <option value="">Semua Sumber</option>
-                    <option value="whatsapp">WhatsApp Langsung</option>
-                    <option value="meta_ads">Meta Ads (CTWA)</option>
-                    <option value="website_form">Website Form</option>
-                    <option value="referral">Rekomendasi Jamaah</option>
-                    <option value="walk_in">Walk-in Kantor</option>
-                    <option value="repeat_order">Alumni / Repeat Order</option>
-                </select>
+                <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                    <button type="button" @click="open = !open"
+                            class="px-2.5 py-1.5 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 rounded-lg text-xs font-medium text-black inline-flex items-center gap-2 transition cursor-pointer">
+                        <span x-text="getFilterSourceLabel()"></span>
+                        <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                         class="absolute left-0 z-50 mt-1 w-52 bg-white border border-zinc-200 rounded-xl shadow-xl max-h-56 overflow-y-auto py-1 text-xs">
+                        <template x-for="src in leadSourceOptions" :key="src.value">
+                            <button type="button" @click="filterSource = src.value; open = false"
+                                    class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                    :class="filterSource === src.value ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                <span x-text="src.label"></span>
+                                <span x-show="filterSource === src.value" class="text-black font-bold">✓</span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
             </div>
 
             <!-- Reset Filters -->
@@ -545,22 +582,33 @@ $initialProspects = $stmt->fetchAll();
                                 </template>
                             </td>
 
-                            <!-- Status Pipa (Quick Dropdown) -->
+                            <!-- Status Pipa (Quick Custom Dropdown) -->
                             <td class="py-3.5 px-3">
-                                <select :value="p.status"
-                                        @change="quickChangeStatus(p, $event.target.value)"
-                                        class="px-2 py-1 rounded-lg text-xs font-semibold border cursor-pointer focus:outline-none"
-                                        :class="getStatusBadgeClass(p.status)">
-                                    <option value="new">1. Baru</option>
-                                    <option value="identifying">2. Identifikasi</option>
-                                    <option value="offered">3. Ditawarkan</option>
-                                    <option value="objection">4. Keberatan (TGJP)</option>
-                                    <option value="followup">5. Follow-up</option>
-                                    <option value="closing">6. Closing</option>
-                                    <option value="nurture">7. Nurture</option>
-                                    <option value="closed_won">8. Closed Won</option>
-                                    <option value="closed_lost">9. Closed Lost</option>
-                                </select>
+                                <div x-data="{ open: false }" class="relative inline-block" @click.outside="open = false">
+                                    <button type="button" @click="open = !open"
+                                            class="px-2.5 py-1 rounded-lg text-xs font-semibold border inline-flex items-center gap-1.5 transition cursor-pointer"
+                                            :class="getStatusBadgeClass(p.status)">
+                                        <span x-text="getStatusLabel(p.status)"></span>
+                                        <svg class="w-3 h-3 opacity-60 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
+                                    <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                         class="absolute left-0 z-50 mt-1 w-48 bg-white border border-zinc-200 rounded-xl shadow-xl max-h-60 overflow-y-auto py-1 text-xs">
+                                        <template x-for="stage in pipelineStages" :key="stage.status">
+                                            <button type="button"
+                                                    @click="quickChangeStatus(p, stage.status); open = false"
+                                                    class="w-full text-left px-3 py-1.5 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                                    :class="p.status === stage.status ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="w-2 h-2 rounded-full" :class="stage.dotClass"></span>
+                                                    <span x-text="stage.title"></span>
+                                                </div>
+                                                <span x-show="p.status === stage.status" class="text-black font-bold text-xs">✓</span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
                             </td>
 
                             <!-- Follow-up Berikutnya -->
@@ -641,16 +689,26 @@ $initialProspects = $stmt->fetchAll();
                         </div>
                         <div>
                             <label class="block font-semibold text-zinc-700 mb-1">Sumber Prospek (Lead Source)</label>
-                            <select x-model="form.lead_source"
-                                    class="w-full px-3 py-2 bg-white border border-zinc-300 rounded-lg focus:border-black outline-none text-xs">
-                                <option value="whatsapp">WhatsApp Langsung</option>
-                                <option value="meta_ads">Meta Ads (Facebook/IG CTWA)</option>
-                                <option value="website_form">Formulir Website</option>
-                                <option value="referral">Rekomendasi Jamaah</option>
-                                <option value="walk_in">Walk-in Kantor</option>
-                                <option value="repeat_order">Alumni / Repeat Order</option>
-                                <option value="other">Lainnya</option>
-                            </select>
+                            <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                                <button type="button" @click="open = !open"
+                                        class="w-full px-3 py-2 bg-white border border-zinc-300 rounded-lg focus:border-black outline-none text-xs flex items-center justify-between cursor-pointer">
+                                    <span class="text-zinc-800" x-text="getLeadSourceLabel(form.lead_source)"></span>
+                                    <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                     class="absolute left-0 z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs">
+                                    <template x-for="src in leadSourceOptions.filter(o => o.value !== '')" :key="src.value">
+                                        <button type="button" @click="form.lead_source = src.value; open = false"
+                                                class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                                :class="form.lead_source === src.value ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                            <span x-text="src.label"></span>
+                                            <span x-show="form.lead_source === src.value" class="text-black font-bold">✓</span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -661,17 +719,39 @@ $initialProspects = $stmt->fetchAll();
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="sm:col-span-2">
                             <label class="block font-semibold text-zinc-700 mb-1">Pilih Paket Umroh (Opsional jika belum pasti)</label>
-                            <select x-model="form.package_id" @change="onPackageChange()"
-                                    class="w-full px-3 py-2 bg-white border border-zinc-300 rounded-lg focus:border-black outline-none text-xs">
-                                <option value="">-- Belum Menentukan Paket (Kualifikasi) --</option>
-                                <?php foreach ($packages as $pkg): ?>
-                                    <option value="<?= $pkg['id'] ?>">
-                                        <?= htmlspecialchars($pkg['name']) ?> — <?= htmlspecialchars($pkg['price']) ?> 
-                                        <?= !empty($pkg['departure_date']) ? ' (' . date('d M Y', strtotime($pkg['departure_date'])) . ')' : '' ?>
-                                        <?= $pkg['quota_remaining'] !== null ? ' • Sisa ' . $pkg['quota_remaining'] . ' seat' : '' ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                                <button type="button" @click="open = !open"
+                                        class="w-full px-3 py-2 bg-white border border-zinc-300 rounded-lg focus:border-black outline-none text-xs flex items-center justify-between cursor-pointer">
+                                    <span class="text-zinc-800 truncate" x-text="getPackageSelectLabel(form.package_id)"></span>
+                                    <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                     class="absolute left-0 z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-56 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                                    <button type="button" @click="form.package_id = ''; onPackageChange(); open = false"
+                                            class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                            :class="!form.package_id ? 'font-bold text-black bg-zinc-50' : 'text-zinc-600'">
+                                        <span class="italic">-- Belum Menentukan Paket (Kualifikasi) --</span>
+                                        <span x-show="!form.package_id" class="text-black font-bold">✓</span>
+                                    </button>
+                                    <template x-for="pkg in packages" :key="pkg.id">
+                                        <button type="button" @click="form.package_id = pkg.id; onPackageChange(); open = false"
+                                                class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                                :class="form.package_id == pkg.id ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                            <div class="pr-2">
+                                                <div class="font-medium" x-text="pkg.name"></div>
+                                                <div class="text-[10px] text-zinc-400 font-mono">
+                                                    <span x-text="pkg.price"></span>
+                                                    <span x-show="pkg.departure_date" x-text="' • ' + formatDateIndo(pkg.departure_date)"></span>
+                                                    <span x-show="pkg.quota_remaining !== null" x-text="' • Sisa ' + pkg.quota_remaining + ' seat'"></span>
+                                                </div>
+                                            </div>
+                                            <span x-show="form.package_id == pkg.id" class="text-black font-bold shrink-0">✓</span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label class="block font-semibold text-zinc-700 mb-1">Target Periode Keberangkatan</label>
@@ -680,13 +760,26 @@ $initialProspects = $stmt->fetchAll();
                         </div>
                         <div>
                             <label class="block font-semibold text-zinc-700 mb-1">Kisaran Budget per Jamaah</label>
-                            <select x-model="form.budget_range"
-                                    class="w-full px-3 py-2 bg-white border border-zinc-300 rounded-lg focus:border-black outline-none text-xs">
-                                <option value="">-- Pilih Range Budget --</option>
-                                <option value="< 28 Juta">Hemat (< Rp 28 Juta)</option>
-                                <option value="28 - 35 Juta">Standar / Reguler (Rp 28 - 35 Juta)</option>
-                                <option value="> 35 Juta">VIP / Bintang 5 (> Rp 35 Juta)</option>
-                            </select>
+                            <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                                <button type="button" @click="open = !open"
+                                        class="w-full px-3 py-2 bg-white border border-zinc-300 rounded-lg focus:border-black outline-none text-xs flex items-center justify-between cursor-pointer">
+                                    <span class="text-zinc-800" x-text="getBudgetLabel(form.budget_range)"></span>
+                                    <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                     class="absolute left-0 z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs">
+                                    <template x-for="opt in budgetOptions" :key="opt.value">
+                                        <button type="button" @click="form.budget_range = opt.value; open = false"
+                                                class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                                :class="form.budget_range === opt.value ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                            <span x-text="opt.label"></span>
+                                            <span x-show="form.budget_range === opt.value" class="text-black font-bold">✓</span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -728,15 +821,32 @@ $initialProspects = $stmt->fetchAll();
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-zinc-700 mb-1">Status Awal di Pipeline</label>
-                        <select x-model="form.status"
-                                class="w-full px-3 py-2 bg-white border border-zinc-300 rounded-lg focus:border-black outline-none text-xs">
-                            <option value="new">1. Prospek Baru (New)</option>
-                            <option value="identifying">2. Identifikasi Kebutuhan</option>
-                            <option value="offered">3. Paket Ditawarkan</option>
-                            <option value="objection">4. Penanganan Keberatan (TGJP)</option>
-                            <option value="followup">5. Follow-up Terjadwal</option>
-                            <option value="closing">6. Tahap Closing / Reservasi</option>
-                        </select>
+                        <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                            <button type="button" @click="open = !open"
+                                    class="w-full px-3 py-2 bg-white border border-zinc-300 rounded-lg focus:border-black outline-none text-xs flex items-center justify-between cursor-pointer">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full" :class="getStageDot(form.status)"></span>
+                                    <span class="text-zinc-800 font-medium" x-text="getStatusLabel(form.status)"></span>
+                                </div>
+                                <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                 class="absolute left-0 z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs">
+                                <template x-for="stage in initialStageOptions" :key="stage.status">
+                                    <button type="button" @click="form.status = stage.status; open = false"
+                                            class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                            :class="form.status === stage.status ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full" :class="stage.dotClass"></span>
+                                            <span x-text="stage.title"></span>
+                                        </div>
+                                        <span x-show="form.status === stage.status" class="text-black font-bold">✓</span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="block font-semibold text-zinc-700 mb-1">Jadwal Follow-up Berikutnya</label>
@@ -785,18 +895,26 @@ $initialProspects = $stmt->fetchAll();
             <form @submit.prevent="confirmLostStatus()" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-semibold text-zinc-800 mb-1">Alasan Utama Batal *</label>
-                    <select x-model="lostForm.reason" required
-                            class="w-full px-3 py-2 border border-zinc-300 rounded-lg text-xs focus:border-black outline-none bg-white">
-                        <option value="">-- Pilih Alasan --</option>
-                        <option value="harga_kemahalan">Harga Kemahalan / Budget Kurang</option>
-                        <option value="jadwal_bentrok">Jadwal Bentrok Pekerjaan / Cuti</option>
-                        <option value="pilih_travel_lain">Memilih Travel Lain (Kompetitor)</option>
-                        <option value="kendala_paspor">Kendala Paspor / Dokumen</option>
-                        <option value="masalah_kesehatan">Masalah Kesehatan / Sakit</option>
-                        <option value="keluarga_tidak_setuju">Keluarga Belum Sepakat</option>
-                        <option value="no_response">Tidak Ada Respons (Ghosting)</option>
-                        <option value="lainnya">Lainnya</option>
-                    </select>
+                    <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                        <button type="button" @click="open = !open"
+                                class="w-full px-3 py-2 border border-zinc-300 rounded-lg text-xs focus:border-black outline-none bg-white flex items-center justify-between cursor-pointer">
+                            <span class="text-zinc-800" x-text="getLostReasonLabel(lostForm.reason)"></span>
+                            <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                             class="absolute left-0 z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs">
+                            <template x-for="opt in lostReasonOptions" :key="opt.value">
+                                <button type="button" @click="lostForm.reason = opt.value; open = false"
+                                        class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                        :class="lostForm.reason === opt.value ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                    <span x-text="opt.label"></span>
+                                    <span x-show="lostForm.reason === opt.value" class="text-black font-bold">✓</span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
@@ -848,16 +966,32 @@ $initialProspects = $stmt->fetchAll();
                     </div>
                     <div>
                         <label class="block font-semibold text-zinc-700 mb-1">Ubah Status (Opsional)</label>
-                        <select x-model="quickFollowupForm.status"
-                                class="w-full px-3 py-1.5 border border-zinc-300 rounded-lg focus:border-black outline-none bg-white text-xs">
-                            <option value="">-- Tetap Sama --</option>
-                            <option value="identifying">Identifikasi</option>
-                            <option value="offered">Ditawarkan</option>
-                            <option value="objection">Keberatan</option>
-                            <option value="followup">Follow-up</option>
-                            <option value="closing">Closing</option>
-                            <option value="closed_won">Closed Won</option>
-                        </select>
+                        <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                            <button type="button" @click="open = !open"
+                                    class="w-full px-3 py-1.5 border border-zinc-300 rounded-lg focus:border-black outline-none bg-white text-xs flex items-center justify-between cursor-pointer">
+                                <span class="text-zinc-800 truncate" x-text="getQuickFollowupStatusLabel(quickFollowupForm.status)"></span>
+                                <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                 class="absolute left-0 z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs">
+                                <button type="button" @click="quickFollowupForm.status = ''; open = false"
+                                        class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                        :class="!quickFollowupForm.status ? 'font-bold text-black bg-zinc-50' : 'text-zinc-600'">
+                                    <span>-- Tetap Sama --</span>
+                                    <span x-show="!quickFollowupForm.status" class="text-black font-bold">✓</span>
+                                </button>
+                                <template x-for="st in quickStatusOptions" :key="st.value">
+                                    <button type="button" @click="quickFollowupForm.status = st.value; open = false"
+                                            class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer"
+                                            :class="quickFollowupForm.status === st.value ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                        <span x-text="st.label"></span>
+                                        <span x-show="quickFollowupForm.status === st.value" class="text-black font-bold">✓</span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -945,6 +1079,55 @@ function prospectsPage() {
             next_date: '',
             status: ''
         },
+
+        // Dropdown Option Datasets for Custom Dropdowns
+        leadSourceOptions: [
+            { value: '', label: 'Semua Sumber' },
+            { value: 'whatsapp', label: 'WhatsApp Langsung' },
+            { value: 'meta_ads', label: 'Meta Ads (CTWA)' },
+            { value: 'website_form', label: 'Formulir Website' },
+            { value: 'referral', label: 'Rekomendasi Jamaah' },
+            { value: 'walk_in', label: 'Walk-in Kantor' },
+            { value: 'repeat_order', label: 'Alumni / Repeat Order' },
+            { value: 'other', label: 'Lainnya' }
+        ],
+
+        budgetOptions: [
+            { value: '', label: '-- Pilih Range Budget --' },
+            { value: '< 28 Juta', label: 'Hemat (< Rp 28 Juta)' },
+            { value: '28 - 35 Juta', label: 'Standar / Reguler (Rp 28 - 35 Juta)' },
+            { value: '> 35 Juta', label: 'VIP / Bintang 5 (> Rp 35 Juta)' }
+        ],
+
+        initialStageOptions: [
+            { status: 'new', title: '1. Prospek Baru (New)', dotClass: 'bg-zinc-400' },
+            { status: 'identifying', title: '2. Identifikasi Kebutuhan', dotClass: 'bg-blue-500' },
+            { status: 'offered', title: '3. Paket Ditawarkan', dotClass: 'bg-indigo-500' },
+            { status: 'objection', title: '4. Penanganan Keberatan (TGJP)', dotClass: 'bg-amber-500' },
+            { status: 'followup', title: '5. Follow-up Terjadwal', dotClass: 'bg-sky-500' },
+            { status: 'closing', title: '6. Tahap Closing / Reservasi', dotClass: 'bg-purple-600' }
+        ],
+
+        lostReasonOptions: [
+            { value: '', label: '-- Pilih Alasan --' },
+            { value: 'harga_kemahalan', label: 'Harga Kemahalan / Budget Kurang' },
+            { value: 'jadwal_bentrok', label: 'Jadwal Bentrok Pekerjaan / Cuti' },
+            { value: 'pilih_travel_lain', label: 'Memilih Travel Lain (Kompetitor)' },
+            { value: 'kendala_paspor', label: 'Kendala Paspor / Dokumen' },
+            { value: 'masalah_kesehatan', label: 'Masalah Kesehatan / Sakit' },
+            { value: 'keluarga_tidak_setuju', label: 'Keluarga Belum Sepakat' },
+            { value: 'no_response', label: 'Tidak Ada Respons (Ghosting)' },
+            { value: 'lainnya', label: 'Lainnya' }
+        ],
+
+        quickStatusOptions: [
+            { value: 'identifying', label: 'Identifikasi' },
+            { value: 'offered', label: 'Ditawarkan' },
+            { value: 'objection', label: 'Keberatan' },
+            { value: 'followup', label: 'Follow-up' },
+            { value: 'closing', label: 'Closing' },
+            { value: 'closed_won', label: 'Closed Won' }
+        ],
 
         // Metrics Computed
         get metrics() {
@@ -1164,6 +1347,55 @@ function prospectsPage() {
                 case 'closed_lost': return 'bg-zinc-200 text-zinc-600 border-zinc-300 line-through';
                 default: return 'bg-zinc-100 text-zinc-700 border-zinc-200';
             }
+        },
+
+        getFilterPackageLabel() {
+            if (!this.filterPackage) return 'Semua Paket';
+            if (this.filterPackage === 'none') return 'Belum Menentukan Paket';
+            const pkg = this.packages.find(p => String(p.id) === String(this.filterPackage));
+            return pkg ? pkg.name : 'Semua Paket';
+        },
+
+        getFilterSourceLabel() {
+            const match = this.leadSourceOptions.find(o => o.value === this.filterSource);
+            return match ? match.label : 'Semua Sumber';
+        },
+
+        getLeadSourceLabel(val) {
+            const match = this.leadSourceOptions.find(o => o.value === val);
+            return match ? match.label : (val || 'Pilih Sumber');
+        },
+
+        getPackageSelectLabel(pkgId) {
+            if (!pkgId) return '-- Belum Menentukan Paket (Kualifikasi) --';
+            const pkg = this.packages.find(p => p.id == pkgId);
+            return pkg ? (pkg.name + ' (' + pkg.price + ')') : '-- Belum Menentukan Paket --';
+        },
+
+        getBudgetLabel(val) {
+            const match = this.budgetOptions.find(o => o.value === val);
+            return match ? match.label : '-- Pilih Range Budget --';
+        },
+
+        getStatusLabel(val) {
+            const stage = this.pipelineStages.find(s => s.status === val);
+            return stage ? stage.title : val;
+        },
+
+        getStageDot(val) {
+            const stage = this.pipelineStages.find(s => s.status === val);
+            return stage ? stage.dotClass : 'bg-zinc-400';
+        },
+
+        getLostReasonLabel(val) {
+            const match = this.lostReasonOptions.find(o => o.value === val);
+            return match ? match.label : '-- Pilih Alasan --';
+        },
+
+        getQuickFollowupStatusLabel(val) {
+            if (!val) return '-- Tetap Sama --';
+            const match = this.quickStatusOptions.find(o => o.value === val);
+            return match ? match.label : val;
         },
 
         formatTimeAgo(dateStr) {

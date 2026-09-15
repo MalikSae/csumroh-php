@@ -253,38 +253,108 @@ require_once __DIR__ . '/../includes/header.php';
             </div>
 
             <!-- Granular Filter Controls (Bulan, Kuota, Status, Reset) -->
+            <?php
+            $currentMonthLabel = 'Semua Bulan';
+            foreach ($monthList as $ym) {
+                if ($filterMonth === $ym) {
+                    $parts = explode('-', $ym);
+                    $currentMonthLabel = 'Bulan: ' . ($indoMonths[$parts[1]] ?? $parts[1]) . ' ' . $parts[0];
+                    break;
+                }
+            }
+            $quotaLabels = [
+                '' => 'Semua Kuota',
+                'available' => 'Tersedia (>0)',
+                'low' => 'Menipis (≤5)',
+                'sold_out' => 'Habis (0)'
+            ];
+            $currentQuotaLabel = $quotaLabels[$filterQuota] ?? 'Semua Kuota';
+
+            $statusLabels = [
+                '' => 'Semua Status',
+                '1' => 'Status: Aktif',
+                '0' => 'Status: Arsip'
+            ];
+            $currentStatusLabel = $statusLabels[$filterStatus] ?? 'Semua Status';
+            ?>
             <div class="flex items-center gap-2 overflow-x-auto no-scrollbar flex-nowrap shrink-0">
                 <!-- Filter Bulan -->
-                <select name="month" onchange="this.form.submit()" 
-                        class="h-10 text-xs font-semibold rounded-xl border border-zinc-200 bg-zinc-50/70 hover:bg-white focus:bg-white px-3 text-zinc-800 focus:border-black focus:outline-none transition shadow-2xs cursor-pointer">
-                    <option value="">Semua Bulan</option>
-                    <?php foreach ($monthList as $ym): ?>
-                        <?php 
-                        $parts = explode('-', $ym);
-                        $lbl = ($indoMonths[$parts[1]] ?? $parts[1]) . ' ' . $parts[0];
-                        ?>
-                        <option value="<?= $ym ?>" <?= $filterMonth === $ym ? 'selected' : '' ?>>
-                            Bulan: <?= $lbl ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
+                <input type="hidden" name="month" id="filter_month" value="<?= htmlspecialchars($filterMonth) ?>">
+                <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                    <button type="button" @click="open = !open"
+                            class="h-10 text-xs font-semibold rounded-xl border border-zinc-200 bg-zinc-50/70 hover:bg-white px-3 text-zinc-800 inline-flex items-center gap-2 transition shadow-2xs cursor-pointer">
+                        <span><?= htmlspecialchars($currentMonthLabel) ?></span>
+                        <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                         class="absolute left-0 z-50 mt-1 w-48 bg-white border border-zinc-200 rounded-xl shadow-xl max-h-56 overflow-y-auto py-1 text-xs">
+                        <button type="button" @click="document.getElementById('filter_month').value = ''; $el.closest('form').submit()"
+                                class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer <?= $filterMonth === '' ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700' ?>">
+                            <span>Semua Bulan</span>
+                            <?php if ($filterMonth === ''): ?><span class="text-black font-bold">✓</span><?php endif; ?>
+                        </button>
+                        <?php foreach ($monthList as $ym): ?>
+                            <?php 
+                            $parts = explode('-', $ym);
+                            $lbl = ($indoMonths[$parts[1]] ?? $parts[1]) . ' ' . $parts[0];
+                            $isSelected = ($filterMonth === $ym);
+                            ?>
+                            <button type="button" @click="document.getElementById('filter_month').value = '<?= $ym ?>'; $el.closest('form').submit()"
+                                    class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer <?= $isSelected ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700' ?>">
+                                <span>Bulan: <?= $lbl ?></span>
+                                <?php if ($isSelected): ?><span class="text-black font-bold">✓</span><?php endif; ?>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
 
                 <!-- Filter Kuota -->
-                <select name="quota" onchange="this.form.submit()" 
-                        class="h-10 text-xs font-semibold rounded-xl border border-zinc-200 bg-zinc-50/70 hover:bg-white focus:bg-white px-3 text-zinc-800 focus:border-black focus:outline-none transition shadow-2xs cursor-pointer">
-                    <option value="">Semua Kuota</option>
-                    <option value="available" <?= $filterQuota === 'available' ? 'selected' : '' ?>>Tersedia (>0)</option>
-                    <option value="low" <?= $filterQuota === 'low' ? 'selected' : '' ?>>Menipis (≤5)</option>
-                    <option value="sold_out" <?= $filterQuota === 'sold_out' ? 'selected' : '' ?>>Habis (0)</option>
-                </select>
+                <input type="hidden" name="quota" id="filter_quota" value="<?= htmlspecialchars($filterQuota) ?>">
+                <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                    <button type="button" @click="open = !open"
+                            class="h-10 text-xs font-semibold rounded-xl border border-zinc-200 bg-zinc-50/70 hover:bg-white px-3 text-zinc-800 inline-flex items-center gap-2 transition shadow-2xs cursor-pointer">
+                        <span><?= htmlspecialchars($currentQuotaLabel) ?></span>
+                        <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                         class="absolute left-0 z-50 mt-1 w-44 bg-white border border-zinc-200 rounded-xl shadow-xl max-h-56 overflow-y-auto py-1 text-xs">
+                        <?php foreach ($quotaLabels as $val => $lbl): ?>
+                            <?php $isSelected = ($filterQuota === (string)$val); ?>
+                            <button type="button" @click="document.getElementById('filter_quota').value = '<?= $val ?>'; $el.closest('form').submit()"
+                                    class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer <?= $isSelected ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700' ?>">
+                                <span><?= $lbl ?></span>
+                                <?php if ($isSelected): ?><span class="text-black font-bold">✓</span><?php endif; ?>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
 
                 <!-- Filter Status -->
-                <select name="status" onchange="this.form.submit()" 
-                        class="h-10 text-xs font-semibold rounded-xl border border-zinc-200 bg-zinc-50/70 hover:bg-white focus:bg-white px-3 text-zinc-800 focus:border-black focus:outline-none transition shadow-2xs cursor-pointer">
-                    <option value="">Semua Status</option>
-                    <option value="1" <?= $filterStatus === '1' ? 'selected' : '' ?>>Status: Aktif</option>
-                    <option value="0" <?= $filterStatus === '0' ? 'selected' : '' ?>>Status: Arsip</option>
-                </select>
+                <input type="hidden" name="status" id="filter_status" value="<?= htmlspecialchars($filterStatus) ?>">
+                <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                    <button type="button" @click="open = !open"
+                            class="h-10 text-xs font-semibold rounded-xl border border-zinc-200 bg-zinc-50/70 hover:bg-white px-3 text-zinc-800 inline-flex items-center gap-2 transition shadow-2xs cursor-pointer">
+                        <span><?= htmlspecialchars($currentStatusLabel) ?></span>
+                        <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                         class="absolute left-0 z-50 mt-1 w-40 bg-white border border-zinc-200 rounded-xl shadow-xl max-h-56 overflow-y-auto py-1 text-xs">
+                        <?php foreach ($statusLabels as $val => $lbl): ?>
+                            <?php $isSelected = ($filterStatus === (string)$val); ?>
+                            <button type="button" @click="document.getElementById('filter_status').value = '<?= $val ?>'; $el.closest('form').submit()"
+                                    class="w-full text-left px-3 py-2 hover:bg-zinc-100 flex items-center justify-between transition cursor-pointer <?= $isSelected ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700' ?>">
+                                <span><?= $lbl ?></span>
+                                <?php if ($isSelected): ?><span class="text-black font-bold">✓</span><?php endif; ?>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
 
                 <!-- Submit Button -->
                 <button type="submit" class="h-10 px-3.5 bg-black hover:bg-zinc-800 text-white rounded-xl text-xs font-semibold transition shadow-2xs flex items-center gap-1.5 shrink-0">

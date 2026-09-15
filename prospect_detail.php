@@ -267,12 +267,12 @@ $targetDp = $totalAdultPax * $pDp;
                         <p class="text-xs text-zinc-400 mt-0.5">Pilihan program umroh, alokasi tipe kamar, dan kalkulasi nilai transaksi.</p>
                     </div>
 
-                    <!-- Package Selector Dropdown -->
+                    <!-- Package Selector Custom Dropdown -->
                     <div x-data="{ open: false }" class="relative" @click.outside="open = false">
                         <button type="button" @click="open = !open" 
                                 class="px-2.5 py-1 text-xs font-medium text-zinc-600 hover:text-black border border-zinc-200 rounded-lg bg-zinc-50 hover:bg-zinc-100 transition inline-flex items-center gap-1">
                             <span x-text="prospect.package_id ? 'Ganti Paket' : 'Pilih Paket'"></span>
-                            <svg class="w-3 h-3 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                            <svg class="w-3 h-3 text-zinc-400 transition-transform duration-200" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
                         </button>
                         <div x-show="open" x-cloak x-transition.opacity.duration.150ms
                              class="absolute right-0 z-50 mt-1.5 w-72 bg-white border border-zinc-200 rounded-xl shadow-xl py-1 text-xs divide-y divide-zinc-50">
@@ -416,7 +416,7 @@ $targetDp = $totalAdultPax * $pDp;
                     </div>
                 </div>
 
-                <!-- Financial Summary Bar (Integrated seamlessly) -->
+                <!-- Financial Summary Bar -->
                 <div class="pt-4 border-t border-zinc-100 flex flex-wrap items-center justify-between gap-4 text-xs">
                     <div class="flex items-center gap-6">
                         <div>
@@ -434,7 +434,7 @@ $targetDp = $totalAdultPax * $pDp;
                     </div>
 
                     <button type="button" @click="openPaymentModal()"
-                            class="px-3 py-1.5 bg-zinc-900 hover:bg-black text-white rounded-lg text-xs font-medium transition">
+                            class="px-3 py-1.5 bg-zinc-900 hover:bg-black text-white rounded-lg text-xs font-medium transition shadow-2xs">
                         Update DP
                     </button>
                 </div>
@@ -515,7 +515,7 @@ $targetDp = $totalAdultPax * $pDp;
                     </span>
                 </div>
 
-                <!-- Fast Chips (Soft, subtle) -->
+                <!-- Fast Chips -->
                 <div class="flex flex-wrap gap-1.5">
                     <template x-for="chip in quickChips" :key="chip">
                         <button type="button" @click="appendQuickChip(chip)"
@@ -533,14 +533,29 @@ $targetDp = $totalAdultPax * $pDp;
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
+                        <!-- Custom Dropdown: Update Status -->
                         <div>
                             <label class="block text-zinc-500 mb-1 font-medium text-[11px]">Update Status</label>
-                            <select x-model="followupForm.status" class="w-full px-2.5 py-1.5 border border-zinc-200 rounded-lg bg-white text-xs">
-                                <template x-for="st in statusOptions" :key="st.val">
-                                    <option :value="st.val" x-text="st.label"></option>
-                                </template>
-                            </select>
+                            <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                                <button type="button" @click="open = !open"
+                                        class="w-full flex items-center justify-between px-2.5 py-1.5 border border-zinc-200 bg-white rounded-lg text-xs font-medium text-zinc-900 focus:outline-none focus:border-black shadow-2xs">
+                                    <span class="truncate" x-text="getStatusLabel(followupForm.status)"></span>
+                                    <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                                </button>
+                                <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                     class="absolute z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-56 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                                    <template x-for="st in statusOptions" :key="st.val">
+                                        <button type="button" @click="followupForm.status = st.val; open = false"
+                                                class="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-zinc-50 transition"
+                                                :class="followupForm.status === st.val ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                            <span x-text="st.label"></span>
+                                            <svg x-show="followupForm.status === st.val" class="w-3.5 h-3.5 text-black shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
+
                         <div>
                             <label class="block text-zinc-500 mb-1 font-medium text-[11px]">Follow-Up Berikutnya</label>
                             <input type="date" x-model="followupForm.next_followup_date"
@@ -560,7 +575,7 @@ $targetDp = $totalAdultPax * $pDp;
                 <div class="flex items-center justify-between pb-3 border-b border-zinc-100">
                     <h2 class="text-sm font-bold text-zinc-900">Skrip Obrolan WhatsApp</h2>
                     
-                    <!-- Clean Segmented Switcher -->
+                    <!-- Segmented Switcher -->
                     <div class="flex items-center bg-zinc-100 p-0.5 rounded-lg text-[11px]">
                         <button type="button" @click="scriptTab = 'followup'"
                                 class="px-2.5 py-1 rounded-md font-medium transition"
@@ -605,7 +620,7 @@ $targetDp = $totalAdultPax * $pDp;
                     <span class="text-xs text-zinc-400 font-mono" x-text="logsList.length + ' catatan'"></span>
                 </div>
 
-                <!-- Timeline List (Minimal, no harsh borders) -->
+                <!-- Timeline List -->
                 <div class="relative pl-5 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-zinc-200 max-h-80 overflow-y-auto pr-1">
                     <template x-for="(item, idx) in logsList" :key="item.id || idx">
                         <div class="relative">
@@ -633,103 +648,199 @@ $targetDp = $totalAdultPax * $pDp;
     </div>
 
     <!-- ============================================================== -->
-    <!-- 4. MODALS (EDIT, LOST, PAYMENT, FLYER)                         -->
+    <!-- 4. MODALS DENGAN 100% CUSTOM DROPDOWNS                        -->
     <!-- ============================================================== -->
 
-    <!-- Modal Edit Profil CRM -->
+    <!-- Modal 1: Edit Profil CRM -->
     <div x-show="showEditModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/50 flex items-center justify-center p-4">
-        <div @click.away="showEditModal = false" class="bg-white border border-zinc-200 rounded-2xl max-w-xl w-full p-6 shadow-xl relative max-h-[90vh] overflow-y-auto">
+        <div @click.away="showEditModal = false" class="bg-white border border-zinc-200 rounded-2xl max-w-xl w-full p-6 shadow-xl relative max-h-[92vh] overflow-y-auto">
             <div class="flex items-center justify-between pb-3 mb-4 border-b border-zinc-100">
                 <h3 class="text-sm font-bold text-zinc-900">Edit Profil Prospek CRM</h3>
                 <button type="button" @click="showEditModal = false" class="text-zinc-400 hover:text-black text-xl font-bold">&times;</button>
             </div>
 
-            <form @submit.prevent="saveProspectEdit()" class="space-y-4 text-xs">
+            <form @submit.prevent="saveProspectEdit()" class="space-y-4 text-xs pb-6">
+                <!-- Nama & WhatsApp -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-medium text-zinc-700 mb-1">Nama Jamaah *</label>
-                        <input type="text" x-model="editForm.name" required class="w-full px-3 py-2 border border-zinc-200 rounded-lg">
+                        <input type="text" x-model="editForm.name" required class="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:border-black outline-none font-semibold">
                     </div>
                     <div>
                         <label class="block font-medium text-zinc-700 mb-1">No. WhatsApp *</label>
-                        <input type="text" x-model="editForm.phone" required class="w-full px-3 py-2 border border-zinc-200 rounded-lg font-mono">
+                        <input type="text" x-model="editForm.phone" required class="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:border-black outline-none font-mono">
                     </div>
                 </div>
 
+                <!-- Kota & Sumber Lead (Custom Dropdown) -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-medium text-zinc-700 mb-1">Kota Domisili</label>
-                        <input type="text" x-model="editForm.city" class="w-full px-3 py-2 border border-zinc-200 rounded-lg">
+                        <input type="text" x-model="editForm.city" class="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:border-black outline-none" placeholder="Contoh: Bandung">
                     </div>
                     <div>
                         <label class="block font-medium text-zinc-700 mb-1">Sumber Lead</label>
-                        <select x-model="editForm.lead_source" class="w-full px-3 py-2 border border-zinc-200 rounded-lg bg-white">
-                            <option value="whatsapp">WhatsApp Inbound</option>
-                            <option value="meta_ads">Meta Ads</option>
-                            <option value="website_form">Website Form</option>
-                            <option value="referral">Referral Alumni</option>
-                            <option value="walk_in">Walk-In</option>
-                            <option value="repeat_order">Repeat Order</option>
-                            <option value="other">Lainnya</option>
-                        </select>
+                        <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                            <button type="button" @click="open = !open"
+                                    class="w-full flex items-center justify-between px-3 py-2 border border-zinc-200 bg-white rounded-lg text-xs font-medium text-zinc-900 focus:outline-none focus:border-black shadow-2xs">
+                                <span class="truncate" x-text="getLeadSourceLabel(editForm.lead_source)"></span>
+                                <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                 class="absolute z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                                <template x-for="opt in leadSourceOptions" :key="opt.val">
+                                    <button type="button" @click="editForm.lead_source = opt.val; open = false"
+                                            class="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-zinc-50 transition"
+                                            :class="editForm.lead_source === opt.val ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                        <span x-text="opt.label"></span>
+                                        <svg x-show="editForm.lead_source === opt.val" class="w-3.5 h-3.5 text-black shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Target Periode & Kisaran Budget (Custom Dropdown) -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-medium text-zinc-700 mb-1">Target Periode</label>
-                        <input type="text" x-model="editForm.target_month" class="w-full px-3 py-2 border border-zinc-200 rounded-lg" placeholder="Contoh: November 2026">
+                        <input type="text" x-model="editForm.target_month" class="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:border-black outline-none" placeholder="Contoh: November 2026">
                     </div>
                     <div>
                         <label class="block font-medium text-zinc-700 mb-1">Kisaran Budget</label>
-                        <select x-model="editForm.budget_range" class="w-full px-3 py-2 border border-zinc-200 rounded-lg bg-white">
-                            <option value="">-- Pilih --</option>
-                            <option value="< 28 Juta">&lt; 28 Juta</option>
-                            <option value="28 - 35 Juta">28 - 35 Juta</option>
-                            <option value="> 35 Juta">&gt; 35 Juta</option>
-                            <option value="Fleksibel">Fleksibel</option>
-                        </select>
+                        <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                            <button type="button" @click="open = !open"
+                                    class="w-full flex items-center justify-between px-3 py-2 border border-zinc-200 bg-white rounded-lg text-xs font-medium text-zinc-900 focus:outline-none focus:border-black shadow-2xs">
+                                <span class="truncate" x-text="getBudgetLabel(editForm.budget_range)"></span>
+                                <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                 class="absolute z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                                <template x-for="opt in budgetOptions" :key="opt.val">
+                                    <button type="button" @click="editForm.budget_range = opt.val; open = false"
+                                            class="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-zinc-50 transition"
+                                            :class="editForm.budget_range === opt.val ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                        <span x-text="opt.label"></span>
+                                        <svg x-show="editForm.budget_range === opt.val" class="w-3.5 h-3.5 text-black shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Status Paspor & Vaksin (Custom Dropdowns) -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-medium text-zinc-700 mb-1">Status Paspor</label>
-                        <select x-model="editForm.passport_status" class="w-full px-3 py-2 border border-zinc-200 rounded-lg bg-white">
-                            <option value="sudah_ada">Sudah Ada &amp; Berlaku</option>
-                            <option value="proses_buat">Proses Buat</option>
-                            <option value="perlu_perpanjang">Perlu Perpanjang</option>
-                            <option value="belum_ada">Belum Ada</option>
-                        </select>
+                        <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                            <button type="button" @click="open = !open"
+                                    class="w-full flex items-center justify-between px-3 py-2 border border-zinc-200 bg-white rounded-lg text-xs font-medium text-zinc-900 focus:outline-none focus:border-black shadow-2xs">
+                                <span class="truncate" x-text="getPassportLabel(editForm.passport_status)"></span>
+                                <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                 class="absolute z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                                <template x-for="opt in passportOptions" :key="opt.val">
+                                    <button type="button" @click="editForm.passport_status = opt.val; open = false"
+                                            class="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-zinc-50 transition"
+                                            :class="editForm.passport_status === opt.val ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                        <span x-text="opt.label"></span>
+                                        <svg x-show="editForm.passport_status === opt.val" class="w-3.5 h-3.5 text-black shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label class="block font-medium text-zinc-700 mb-1">Status Vaksin</label>
-                        <select x-model="editForm.vaccine_status" class="w-full px-3 py-2 border border-zinc-200 rounded-lg bg-white">
-                            <option value="sudah">Sudah Vaksin</option>
-                            <option value="belum">Belum Vaksin</option>
-                        </select>
+                        <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                            <button type="button" @click="open = !open"
+                                    class="w-full flex items-center justify-between px-3 py-2 border border-zinc-200 bg-white rounded-lg text-xs font-medium text-zinc-900 focus:outline-none focus:border-black shadow-2xs">
+                                <span class="truncate" x-text="getVaccineLabel(editForm.vaccine_status)"></span>
+                                <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                 class="absolute z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                                <template x-for="opt in vaccineOptions" :key="opt.val">
+                                    <button type="button" @click="editForm.vaccine_status = opt.val; open = false"
+                                            class="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-zinc-50 transition"
+                                            :class="editForm.vaccine_status === opt.val ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                        <span x-text="opt.label"></span>
+                                        <svg x-show="editForm.vaccine_status === opt.val" class="w-3.5 h-3.5 text-black shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferensi Kamar & Decision Maker (Custom Dropdowns) -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-medium text-zinc-700 mb-1">Preferensi Kamar</label>
+                        <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                            <button type="button" @click="open = !open"
+                                    class="w-full flex items-center justify-between px-3 py-2 border border-zinc-200 bg-white rounded-lg text-xs font-medium text-zinc-900 focus:outline-none focus:border-black shadow-2xs">
+                                <span class="truncate" x-text="getRoomPrefLabel(editForm.room_preference)"></span>
+                                <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                 class="absolute z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                                <template x-for="opt in roomPrefOptions" :key="opt.val">
+                                    <button type="button" @click="editForm.room_preference = opt.val; open = false"
+                                            class="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-zinc-50 transition"
+                                            :class="editForm.room_preference === opt.val ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                        <span x-text="opt.label"></span>
+                                        <svg x-show="editForm.room_preference === opt.val" class="w-3.5 h-3.5 text-black shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-medium text-zinc-700 mb-1">Decision Maker</label>
+                        <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                            <button type="button" @click="open = !open"
+                                    class="w-full flex items-center justify-between px-3 py-2 border border-zinc-200 bg-white rounded-lg text-xs font-medium text-zinc-900 focus:outline-none focus:border-black shadow-2xs">
+                                <span class="truncate" x-text="getDecisionMakerLabel(editForm.decision_maker)"></span>
+                                <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                                 class="absolute z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                                <template x-for="opt in decisionMakerOptions" :key="opt.val">
+                                    <button type="button" @click="editForm.decision_maker = opt.val; open = false"
+                                            class="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-zinc-50 transition"
+                                            :class="editForm.decision_maker === opt.val ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                        <span x-text="opt.label"></span>
+                                        <svg x-show="editForm.decision_maker === opt.val" class="w-3.5 h-3.5 text-black shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div>
                     <label class="block font-medium text-zinc-700 mb-1">Kebutuhan Khusus / Lansia</label>
-                    <textarea x-model="editForm.special_needs" rows="2" class="w-full px-3 py-2 border border-zinc-200 rounded-lg"></textarea>
+                    <textarea x-model="editForm.special_needs" rows="2" class="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:border-black outline-none"></textarea>
                 </div>
 
                 <div>
                     <label class="block font-medium text-zinc-700 mb-1">Catatan Bebas</label>
-                    <textarea x-model="editForm.notes" rows="2" class="w-full px-3 py-2 border border-zinc-200 rounded-lg"></textarea>
+                    <textarea x-model="editForm.notes" rows="2" class="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:border-black outline-none"></textarea>
                 </div>
 
                 <div class="pt-3 flex justify-end gap-2 border-t border-zinc-100">
-                    <button type="button" @click="showEditModal = false" class="px-4 py-2 border border-zinc-200 rounded-lg text-zinc-600">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-black text-white rounded-lg font-medium">Simpan</button>
+                    <button type="button" @click="showEditModal = false" class="px-4 py-2 border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-zinc-800 transition shadow-2xs">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Lost Status -->
+    <!-- Modal 2: Lost Status (Custom Dropdown) -->
     <div x-show="showLostModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/50 flex items-center justify-center p-4">
         <div @click.away="showLostModal = false" class="bg-white border border-zinc-200 rounded-2xl max-w-md w-full p-6 shadow-xl relative text-xs">
             <div class="flex items-center justify-between pb-3 mb-3 border-b border-zinc-100">
@@ -737,36 +848,43 @@ $targetDp = $totalAdultPax * $pDp;
                 <button type="button" @click="showLostModal = false" class="text-zinc-400 hover:text-black text-xl font-bold">&times;</button>
             </div>
 
-            <form @submit.prevent="submitLostStatus()" class="space-y-3">
+            <form @submit.prevent="submitLostStatus()" class="space-y-3 pb-4">
                 <div>
                     <label class="block font-medium text-zinc-700 mb-1">Alasan Utama *</label>
-                    <select x-model="lostForm.reason" required class="w-full px-3 py-2 border border-zinc-200 rounded-lg bg-white">
-                        <option value="">-- Pilih Alasan --</option>
-                        <option value="harga_kemahalan">Harga di luar budget / kemahalan</option>
-                        <option value="jadwal_bentrok">Jadwal bentrok kerja / cuti</option>
-                        <option value="pilih_travel_lain">Pilih travel umroh lain</option>
-                        <option value="kendala_paspor">Kendala paspor</option>
-                        <option value="masalah_kesehatan">Kondisi fisik / kesehatan</option>
-                        <option value="keluarga_tidak_setuju">Keluarga belum sepakat</option>
-                        <option value="no_response">Ghosting / tidak merespon</option>
-                        <option value="lainnya">Lainnya</option>
-                    </select>
+                    <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                        <button type="button" @click="open = !open"
+                                class="w-full flex items-center justify-between px-3 py-2 border border-zinc-200 bg-white rounded-lg text-xs font-medium text-zinc-900 focus:outline-none focus:border-black shadow-2xs">
+                            <span class="truncate" x-text="getLostReasonLabel(lostForm.reason)"></span>
+                            <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                             class="absolute z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                            <template x-for="opt in lostReasonOptions" :key="opt.val">
+                                <button type="button" @click="lostForm.reason = opt.val; open = false"
+                                        class="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-zinc-50 transition"
+                                        :class="lostForm.reason === opt.val ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                    <span x-text="opt.label"></span>
+                                    <svg x-show="lostForm.reason === opt.val" class="w-3.5 h-3.5 text-black shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
                 </div>
 
                 <div>
                     <label class="block font-medium text-zinc-700 mb-1">Detail Keterangan</label>
-                    <textarea x-model="lostForm.detail" rows="3" class="w-full px-3 py-2 border border-zinc-200 rounded-lg" placeholder="Catatan singkat mengapa jamaah batal..."></textarea>
+                    <textarea x-model="lostForm.detail" rows="3" class="w-full px-3 py-2 border border-zinc-200 rounded-lg focus:border-black outline-none" placeholder="Catatan singkat mengapa jamaah batal..."></textarea>
                 </div>
 
                 <div class="pt-3 flex justify-end gap-2 border-t border-zinc-100">
-                    <button type="button" @click="showLostModal = false" class="px-4 py-2 border border-zinc-200 rounded-lg text-zinc-600">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-zinc-900 text-white rounded-lg font-medium">Tandai Lost</button>
+                    <button type="button" @click="showLostModal = false" class="px-4 py-2 border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-zinc-900 hover:bg-black text-white rounded-lg font-medium transition shadow-2xs">Tandai Lost</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Payment DP -->
+    <!-- Modal 3: Payment DP (Custom Dropdown) -->
     <div x-show="showPaymentModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/50 flex items-center justify-center p-4">
         <div @click.away="showPaymentModal = false" class="bg-white border border-zinc-200 rounded-2xl max-w-md w-full p-6 shadow-xl relative text-xs">
             <div class="flex items-center justify-between pb-3 mb-3 border-b border-zinc-100">
@@ -774,30 +892,43 @@ $targetDp = $totalAdultPax * $pDp;
                 <button type="button" @click="showPaymentModal = false" class="text-zinc-400 hover:text-black text-xl font-bold">&times;</button>
             </div>
 
-            <form @submit.prevent="submitPaymentUpdate()" class="space-y-3">
+            <form @submit.prevent="submitPaymentUpdate()" class="space-y-3 pb-4">
                 <div>
                     <label class="block font-medium text-zinc-700 mb-1">Nominal DP Masuk (Rp) *</label>
-                    <input type="text" x-model="paymentForm.dp_amount" required class="w-full px-3 py-2 border border-zinc-200 rounded-lg font-mono font-bold">
+                    <input type="text" x-model="paymentForm.dp_amount" required class="w-full px-3 py-2 border border-zinc-200 rounded-lg font-mono font-bold focus:border-black outline-none">
                 </div>
 
                 <div>
                     <label class="block font-medium text-zinc-700 mb-1">Status Pembayaran</label>
-                    <select x-model="paymentForm.payment_status" class="w-full px-3 py-2 border border-zinc-200 rounded-lg bg-white">
-                        <option value="unpaid">Belum Bayar DP (Unpaid)</option>
-                        <option value="partial_dp">DP Sebagian (Partial DP)</option>
-                        <option value="paid_full">Lunas 100% (Paid Full)</option>
-                    </select>
+                    <div x-data="{ open: false }" class="relative" @click.outside="open = false">
+                        <button type="button" @click="open = !open"
+                                class="w-full flex items-center justify-between px-3 py-2 border border-zinc-200 bg-white rounded-lg text-xs font-medium text-zinc-900 focus:outline-none focus:border-black shadow-2xs">
+                            <span class="truncate" x-text="getPaymentStatusLabel(paymentForm.payment_status)"></span>
+                            <svg class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 shrink-0" :class="open ? 'rotate-180' : ''" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak x-transition.opacity.duration.150ms
+                             class="absolute z-50 mt-1 w-full bg-white border border-zinc-200 rounded-xl shadow-xl max-h-52 overflow-y-auto py-1 text-xs divide-y divide-zinc-50">
+                            <template x-for="opt in paymentStatusOptions" :key="opt.val">
+                                <button type="button" @click="paymentForm.payment_status = opt.val; open = false"
+                                        class="w-full px-3 py-2 text-left flex items-center justify-between hover:bg-zinc-50 transition"
+                                        :class="paymentForm.payment_status === opt.val ? 'font-bold text-black bg-zinc-50' : 'text-zinc-700'">
+                                    <span x-text="opt.label"></span>
+                                    <svg x-show="paymentForm.payment_status === opt.val" class="w-3.5 h-3.5 text-black shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="pt-3 flex justify-end gap-2 border-t border-zinc-100">
-                    <button type="button" @click="showPaymentModal = false" class="px-4 py-2 border border-zinc-200 rounded-lg text-zinc-600">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-black text-white rounded-lg font-medium">Simpan DP</button>
+                    <button type="button" @click="showPaymentModal = false" class="px-4 py-2 border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-zinc-800 transition shadow-2xs">Simpan DP</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal Flyer -->
+    <!-- Modal 4: Flyer -->
     <div x-show="showFlyerModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto bg-black/75 flex items-center justify-center p-4">
         <div @click.away="showFlyerModal = false" class="bg-white rounded-2xl max-w-lg w-full p-4 shadow-xl relative">
             <div class="flex justify-between items-center mb-2">
@@ -883,6 +1014,7 @@ function prospect360Page() {
             { key: 'closed_won', short: 'Won (DP)', label: '7. Closed Won' }
         ],
 
+        // Master Dropdown Options
         statusOptions: [
             { val: 'new', label: 'Prospek Baru' },
             { val: 'identifying', label: 'Sedang Diidentifikasi' },
@@ -893,6 +1025,70 @@ function prospect360Page() {
             { val: 'nurture', label: 'Nurture' },
             { val: 'closed_won', label: 'Closing (Won DP)' },
             { val: 'closed_lost', label: 'Batal (Closed Lost)' }
+        ],
+
+        leadSourceOptions: [
+            { val: 'whatsapp', label: 'WhatsApp Inbound' },
+            { val: 'meta_ads', label: 'Meta Ads (FB/IG)' },
+            { val: 'website_form', label: 'Website Form' },
+            { val: 'referral', label: 'Referral Alumni' },
+            { val: 'walk_in', label: 'Walk-In Kantor' },
+            { val: 'repeat_order', label: 'Repeat Order' },
+            { val: 'other', label: 'Lainnya' }
+        ],
+
+        budgetOptions: [
+            { val: '', label: '-- Pilih Budget --' },
+            { val: '< 28 Juta', label: '< 28 Juta' },
+            { val: '28 - 35 Juta', label: '28 - 35 Juta' },
+            { val: '> 35 Juta', label: '> 35 Juta' },
+            { val: 'Fleksibel', label: 'Fleksibel' }
+        ],
+
+        passportOptions: [
+            { val: 'sudah_ada', label: 'Sudah Ada & Berlaku' },
+            { val: 'proses_buat', label: 'Sedang Proses Buat' },
+            { val: 'perlu_perpanjang', label: 'Perlu Perpanjang' },
+            { val: 'belum_ada', label: 'Belum Ada' }
+        ],
+
+        vaccineOptions: [
+            { val: 'sudah', label: 'Sudah Vaksin' },
+            { val: 'belum', label: 'Belum Vaksin' }
+        ],
+
+        roomPrefOptions: [
+            { val: '', label: '-- Belum Pasti --' },
+            { val: 'quad', label: 'Kamar Quad (4 Orang)' },
+            { val: 'triple', label: 'Kamar Triple (3 Orang)' },
+            { val: 'double', label: 'Kamar Double (2 Orang)' }
+        ],
+
+        decisionMakerOptions: [
+            { val: '', label: '-- Belum Dicatat --' },
+            { val: 'diri_sendiri', label: 'Diri Sendiri' },
+            { val: 'pasangan', label: 'Pasangan (Suami/Istri)' },
+            { val: 'anak', label: 'Anak' },
+            { val: 'keluarga_besar', label: 'Keluarga Besar' },
+            { val: 'kantor', label: 'Instansi / Kantor' }
+        ],
+
+        lostReasonOptions: [
+            { val: '', label: '-- Pilih Alasan --' },
+            { val: 'harga_kemahalan', label: 'Harga di luar budget / kemahalan' },
+            { val: 'jadwal_bentrok', label: 'Jadwal bentrok kerja / cuti' },
+            { val: 'pilih_travel_lain', label: 'Pilih travel umroh lain' },
+            { val: 'kendala_paspor', label: 'Kendala paspor' },
+            { val: 'masalah_kesehatan', label: 'Kondisi fisik / kesehatan' },
+            { val: 'keluarga_tidak_setuju', label: 'Keluarga belum sepakat' },
+            { val: 'no_response', label: 'Ghosting / tidak merespon' },
+            { val: 'lainnya', label: 'Alasan lainnya' }
+        ],
+
+        paymentStatusOptions: [
+            { val: 'unpaid', label: 'Belum Bayar DP (Unpaid)' },
+            { val: 'partial_dp', label: 'DP Sebagian (Partial DP)' },
+            { val: 'paid_full', label: 'Lunas 100% (Paid Full)' }
         ],
 
         get currentPackage() {
@@ -956,56 +1152,66 @@ function prospect360Page() {
             return Math.floor(sec / 86400) + 'h lalu';
         },
 
+        // Dropdown Label Getters
         getStatusLabel(st) {
             const found = this.statusOptions.find(s => s.val === st);
-            return found ? found.label : st;
+            return found ? found.label : (st || 'Prospek Baru');
+        },
+
+        getLeadSourceLabel(val) {
+            const f = this.leadSourceOptions.find(o => o.val === val);
+            return f ? f.label : (val || 'WhatsApp Inbound');
+        },
+
+        getBudgetLabel(val) {
+            const f = this.budgetOptions.find(o => o.val === val);
+            return f ? f.label : (val || '-- Pilih Budget --');
+        },
+
+        getPassportLabel(val) {
+            const f = this.passportOptions.find(o => o.val === val);
+            return f ? f.label : (val || 'Belum Ada');
+        },
+
+        getVaccineLabel(val) {
+            const f = this.vaccineOptions.find(o => o.val === val);
+            return f ? f.label : (val === 'sudah' ? 'Sudah Vaksin' : 'Belum Vaksin');
+        },
+
+        getRoomPrefLabel(val) {
+            const f = this.roomPrefOptions.find(o => o.val === val);
+            return f ? f.label : (val ? ('Kamar ' + val) : '-- Belum Pasti --');
+        },
+
+        getDecisionMakerLabel(val) {
+            const f = this.decisionMakerOptions.find(o => o.val === val);
+            return f ? f.label : (val || '-- Belum Dicatat --');
+        },
+
+        getLostReasonLabel(val) {
+            const f = this.lostReasonOptions.find(o => o.val === val);
+            return f ? f.label : (val || '-- Pilih Alasan --');
+        },
+
+        getPaymentStatusLabel(val) {
+            const f = this.paymentStatusOptions.find(o => o.val === val);
+            return f ? f.label : (val || 'Belum Bayar DP');
         },
 
         formatLeadSource(src) {
-            switch(src) {
-                case 'whatsapp': return 'WhatsApp';
-                case 'meta_ads': return 'Meta Ads';
-                case 'website_form': return 'Website Form';
-                case 'referral': return 'Referral';
-                case 'walk_in': return 'Walk-In';
-                case 'repeat_order': return 'Repeat Order';
-                default: return src || 'WhatsApp';
-            }
+            return this.getLeadSourceLabel(src);
         },
 
         formatPassportStatus(st) {
-            switch(st) {
-                case 'sudah_ada': return 'Sudah Ada';
-                case 'proses_buat': return 'Proses Buat';
-                case 'perlu_perpanjang': return 'Perlu Perpanjang';
-                case 'belum_ada': return 'Belum Ada';
-                default: return st || 'Belum Ada';
-            }
+            return this.getPassportLabel(st);
         },
 
         formatDecisionMaker(dm) {
-            switch(dm) {
-                case 'diri_sendiri': return 'Diri Sendiri';
-                case 'pasangan': return 'Pasangan';
-                case 'anak': return 'Anak';
-                case 'keluarga_besar': return 'Keluarga';
-                case 'kantor': return 'Instansi';
-                default: return dm || '-';
-            }
+            return this.getDecisionMakerLabel(dm);
         },
 
         formatLostReason(r) {
-            switch(r) {
-                case 'harga_kemahalan': return 'Harga kemahalan';
-                case 'jadwal_bentrok': return 'Jadwal bentrok';
-                case 'pilih_travel_lain': return 'Pilih travel lain';
-                case 'kendala_paspor': return 'Kendala paspor';
-                case 'masalah_kesehatan': return 'Kesehatan fisik';
-                case 'keluarga_tidak_setuju': return 'Keluarga belum sepakat';
-                case 'no_response': return 'Ghosting';
-                case 'lainnya': return 'Alasan lainnya';
-                default: return r || 'Batal';
-            }
+            return this.getLostReasonLabel(r);
         },
 
         getStatusBadgeClass(status) {
@@ -1292,6 +1498,8 @@ function prospect360Page() {
                     this.showEditModal = false;
                     window.showToast('Profil prospek diperbarui.');
                     await this.reloadLogs();
+                } else {
+                    alert(data.error || 'Gagal memperbarui prospek');
                 }
             } catch(e) {
                 console.error(e);
